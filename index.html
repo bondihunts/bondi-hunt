@@ -4,136 +4,172 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="theme-color" content="#0b0b0f">
-<title>Phone</title>
+<title>iPhone</title>
 <style>
-/* ================== THEME ================== */
+/* ================== THEME — iPhone OS 1 (2007) ================== */
 :root{
-  --bg:#0b0b0f; --screen:#f2f2f7; --panel:#ffffff; --ink:#111; --muted:#8a8a8e;
-  --line:#dcdce0; --me:#0a84ff; --them:#e5e5ea; --green:#34c759; --red:#ff3b30;
-  --home-gap:26px; /* room for the home indicator */
+  --bg:#0b0b0f; --ink:#000; --muted:#7f7f7f; --line:#d9d9d9;
+  --nav1:#b2bfd0; --nav2:#6d84a2; --nav3:#4a6890;
+  --green1:#c9f39a; --green2:#7fd03c; --gray1:#f2f2f2; --gray2:#cfcfcf;
+  --blue:#2a5ea8; --red:#d4271c; --sb:20px;
+  --home-gap:52px; /* room for the home button */
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);overscroll-behavior:none}
+html,body{height:100%;background:var(--bg);font-family:Helvetica,"Helvetica Neue",Arial,sans-serif;color:var(--ink);overscroll-behavior:none}
 body{display:flex;align-items:center;justify-content:center}
-#phone{position:relative;width:100%;height:100%;overflow:hidden;background:var(--screen)}
+#phone{position:relative;width:100%;height:100%;overflow:hidden;background:#000}
 @media (min-width:600px){
-  #phone{width:390px;height:800px;border-radius:44px;border:12px solid #1c1c1e;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+  #phone{width:360px;height:740px;border-radius:38px;border:14px solid #111;outline:2px solid #8b8f94;box-shadow:0 30px 80px rgba(0,0,0,.6)}
 }
-.screen{position:absolute;inset:0;display:none;flex-direction:column}
+.screen{position:absolute;inset:calc(env(safe-area-inset-top) + var(--sb)) 0 0 0;display:none;flex-direction:column}
 .screen.active{display:flex}
 button{font-family:inherit}
 
+/* ================== STATUS BAR ================== */
+#sbar{position:absolute;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + var(--sb));padding-top:env(safe-area-inset-top);
+  background:linear-gradient(#3a3a3a,#000);color:#fff;font-size:12px;font-weight:bold;display:flex;align-items:center;justify-content:space-between;padding-left:6px;padding-right:6px;z-index:70}
+#sbar .sb-l{display:flex;align-items:center;gap:4px}
+#sbar .bars{display:flex;align-items:flex-end;gap:1px;height:10px}
+#sbar .bars i{width:3px;background:#fff;display:block}
+#sbar .bat{width:22px;height:10px;border:1.5px solid #fff;border-radius:2px;position:relative;padding:1px}
+#sbar .bat::after{content:"";position:absolute;right:-4px;top:2px;width:2px;height:4px;background:#fff}
+#sbar .bat i{display:block;height:100%;width:70%;background:linear-gradient(#bff58a,#5cc012)}
+
 /* ================== LOCK SCREEN ================== */
-#lock{background:radial-gradient(ellipse at 30% 20%,#2b4a6b 0%,#14243a 45%,#070b12 100%);color:#fff;align-items:center;padding:env(safe-area-inset-top) 20px 30px}
-#lock .clock{margin-top:9vh;font-size:76px;font-weight:200;letter-spacing:-2px}
-#lock .date{font-size:17px;opacity:.85;margin-top:-4px}
-#lock .prompt{margin-top:5vh;font-size:16px;opacity:.9}
-#dots{display:flex;gap:18px;margin:18px 0 28px}
-#dots span{width:14px;height:14px;border-radius:50%;border:1.5px solid #fff;transition:background .15s}
-#dots span.on{background:#fff}
+#lock{background:radial-gradient(ellipse at 50% 55%,#2f6db0 0%,#123a6b 45%,#03101f 100%);color:#fff;align-items:stretch}
+.lk-top{background:linear-gradient(rgba(70,70,70,.75),rgba(0,0,0,.75) 50%,rgba(0,0,0,.85));border-bottom:1px solid #555;text-align:center;padding:10px 0 12px}
+#lock .clock{font-size:64px;font-weight:200;line-height:1;letter-spacing:-1px}
+#lock .date{font-size:16px;font-weight:bold;opacity:.9;margin-top:4px}
+.lk-bottom{margin-top:auto;background:linear-gradient(rgba(70,70,70,.75),rgba(0,0,0,.8) 50%,rgba(0,0,0,.9));border-top:1px solid #555;padding:22px 20px calc(env(safe-area-inset-bottom) + 26px)}
+.slider{position:relative;height:52px;border-radius:12px;background:linear-gradient(#111,#2a2a2a);border:1px solid #444;box-shadow:inset 0 2px 4px rgba(0,0,0,.8);overflow:hidden;touch-action:none}
+.slide-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-left:56px;font-size:21px;
+  background:linear-gradient(90deg,#4a4a4a 0%,#4a4a4a 40%,#fff 50%,#4a4a4a 60%,#4a4a4a 100%);background-size:200% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 2.6s linear infinite}
+@keyframes shimmer{from{background-position:150% 0}to{background-position:-50% 0}}
+.knob{position:absolute;left:3px;top:3px;width:60px;height:44px;border-radius:9px;background:linear-gradient(#fdfdfd,#c4c4c4 50%,#a9a9a9 51%,#dcdcdc);
+  color:#6a6a6a;font-size:26px;display:flex;align-items:center;justify-content:center;cursor:grab;z-index:2;box-shadow:0 1px 2px rgba(0,0,0,.6)}
+.passpanel{position:absolute;inset:0;z-index:5;display:none;flex-direction:column;background:linear-gradient(#5b6f8a,#2c3e57 30%,#1a283c)}
+.passpanel.show{display:flex}
+.pp-title{color:#fff;font-size:18px;font-weight:bold;text-align:center;margin:26px 0 14px;text-shadow:0 -1px 0 rgba(0,0,0,.6)}
+#dots{display:flex;gap:10px;justify-content:center;margin-bottom:auto}
+#dots span{width:52px;height:52px;border-radius:6px;background:#fff;box-shadow:inset 0 2px 3px rgba(0,0,0,.4);position:relative}
+#dots span.on::after{content:"";position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#000}
 #dots.shake{animation:shake .4s}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-12px)}40%,80%{transform:translateX(12px)}}
-#pad{display:grid;grid-template-columns:repeat(3,78px);gap:16px 26px}
-#pad button{width:78px;height:78px;border-radius:50%;border:none;background:rgba(255,255,255,.16);color:#fff;font-size:32px;font-weight:300;cursor:pointer}
-#pad button:active{background:rgba(255,255,255,.4)}
-#pad button.blank{background:none;pointer-events:none}
-#pad button.del{background:none;font-size:16px}
+#pad{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#1c1c1c;border-top:1px solid #000;padding-bottom:env(safe-area-inset-bottom)}
+#pad button{height:58px;border:none;background:linear-gradient(#5f6266,#3b3e42 50%,#2f3236 51%,#3c3f43);color:#fff;font-size:28px;font-weight:bold;cursor:pointer;text-shadow:0 -1px 0 #000}
+#pad button:active{background:linear-gradient(#7aa4e0,#2a5ea8)}
+#pad button.blank{pointer-events:none;font-size:13px;color:#aaa;font-weight:normal}
+#pad button.del{font-size:22px}
 
 /* ================== HOME SCREEN ================== */
-#home{background:radial-gradient(ellipse at 70% 10%,#3f7fa8 0%,#1d4b6e 40%,#0c2236 100%);color:#fff;padding:calc(env(safe-area-inset-top) + 18px) 18px calc(env(safe-area-inset-bottom) + var(--home-gap))}
-.widget{background:rgba(255,255,255,.18);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:22px;padding:14px 16px;margin:6px 4px 22px}
-.widget .w-day{font-size:13px;font-weight:600;color:#ffd36b;text-transform:uppercase}
-.widget .w-date{font-size:34px;font-weight:300;line-height:1.1}
-.widget .w-sub{font-size:13px;opacity:.85;margin-top:4px}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px 8px;justify-items:center}
-.app{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;position:relative;background:none;border:none;color:#fff}
-.app .ico{width:60px;height:60px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 2px 6px rgba(0,0,0,.25)}
-.app .lbl{font-size:12px;text-shadow:0 1px 2px rgba(0,0,0,.4)}
-.app .appbadge{position:absolute;top:-6px;right:-6px;min-width:22px;height:22px;border-radius:11px;background:var(--red);color:#fff;font-size:13px;font-weight:600;display:none;align-items:center;justify-content:center;padding:0 6px}
+#home{background:#000;color:#fff;padding:14px 8px 0}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 4px;justify-items:center}
+.app{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;position:relative;background:none;border:none;color:#fff}
+.app .ico{width:58px;height:58px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:30px;position:relative;overflow:hidden;
+  box-shadow:0 2px 4px rgba(0,0,0,.7)}
+.app .ico::after{content:"";position:absolute;left:-10%;right:-10%;top:-60%;height:105%;border-radius:0 0 50% 50%;
+  background:linear-gradient(rgba(255,255,255,.75),rgba(255,255,255,.15));pointer-events:none}
+.app .lbl{font-size:11px;font-weight:bold;text-shadow:0 1px 2px #000}
+.app .appbadge{position:absolute;top:-7px;right:-7px;min-width:24px;height:24px;border-radius:12px;background:radial-gradient(circle at 50% 30%,#ff8a80,#d4271c 60%);
+  border:2px solid #fff;color:#fff;font-size:13px;font-weight:bold;display:none;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 1px 3px #000;z-index:3}
 .app.wiggle .ico{animation:wig .35s}
 @keyframes wig{25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
-.dock{margin-top:auto;background:rgba(255,255,255,.2);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:28px;padding:14px 10px;display:grid;grid-template-columns:repeat(4,1fr);justify-items:center}
-.dock .lbl{display:none}
+.dock{margin:auto -8px 0;height:96px;padding:10px 8px calc(var(--home-gap) - 26px);display:grid;grid-template-columns:repeat(4,1fr);justify-items:center;align-items:start;
+  background:linear-gradient(rgba(255,255,255,.35),rgba(255,255,255,.12) 40%,rgba(120,120,120,.25) 41%,rgba(40,40,40,.6));border-top:1px solid rgba(255,255,255,.5)}
 
-/* ================== HOME INDICATOR ================== */
-#homebar{position:absolute;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom) + 22px);display:none;align-items:flex-start;justify-content:center;padding-top:8px;z-index:50;cursor:pointer}
-#homebar i{width:134px;height:5px;border-radius:3px;background:rgba(0,0,0,.8)}
-#homebar.light i{background:rgba(255,255,255,.85)}
+/* ================== HOME BUTTON ================== */
+#homebar{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 6px);width:36px;height:36px;margin-left:-18px;border-radius:50%;
+  background:radial-gradient(circle at 50% 35%,#3a3a3a,#0d0d0d 70%);border:1px solid #555;display:none;align-items:center;justify-content:center;z-index:50;cursor:pointer;opacity:.85}
+#homebar i{width:12px;height:12px;border:1.5px solid #bbb;border-radius:3px}
 
-/* ================== NOTIFICATION BANNER ================== */
-#banner{position:absolute;left:8px;right:8px;top:calc(env(safe-area-inset-top) + 8px);z-index:60;background:rgba(245,245,247,.97);border-radius:18px;padding:11px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 8px 30px rgba(0,0,0,.25);transform:translateY(-150%);transition:transform .35s cubic-bezier(.2,.9,.3,1.2);cursor:pointer}
-#banner.show{transform:none}
-#banner .ico{width:36px;height:36px;border-radius:9px;background:linear-gradient(#65e36f,#2fbf45);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-#banner .b-title{font-weight:600;font-size:14px}
-#banner .b-text{font-size:14px;color:#333;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* ================== ALERT (2007 SMS pop-up) ================== */
+#banner{position:absolute;left:28px;right:28px;top:32%;z-index:60;border-radius:12px;padding:14px 14px 12px;text-align:center;color:#fff;
+  background:linear-gradient(rgba(70,90,130,.96),rgba(20,35,70,.96));border:2px solid rgba(255,255,255,.75);box-shadow:0 8px 30px rgba(0,0,0,.6);
+  opacity:0;pointer-events:none;transform:scale(.9);transition:opacity .2s,transform .2s;cursor:pointer}
+#banner.show{opacity:1;pointer-events:auto;transform:none}
+#banner .ico{display:none}
+#banner .b-title{font-weight:bold;font-size:17px;margin-bottom:6px}
+#banner .b-text{font-size:15px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+#banner .b-btns{display:flex;gap:8px;margin-top:12px}
+#banner .b-btns span{flex:1;padding:8px 0;border-radius:8px;font-weight:bold;font-size:15px;
+  background:linear-gradient(rgba(255,255,255,.45),rgba(255,255,255,.15) 50%,rgba(255,255,255,.05) 51%,rgba(255,255,255,.2));border:1px solid rgba(255,255,255,.5)}
 
-/* ================== LIST SCREENS (Contacts / Messages) ================== */
-.navbar{padding:calc(env(safe-area-inset-top) + 10px) 16px 8px;background:var(--panel)}
-.navbar .row{display:flex;justify-content:space-between;align-items:center;min-height:28px}
-.navbar h1{font-size:32px;font-weight:700;margin-top:4px}
-.link{background:none;border:none;color:var(--me);font-size:17px;cursor:pointer;padding:2px 0}
-.search{margin-top:8px;display:flex;align-items:center;gap:6px;background:#eeeef0;border-radius:10px;padding:8px 10px;color:var(--muted)}
-.search input{flex:1;border:none;background:none;font-size:16px;outline:none;font-family:inherit;color:var(--ink)}
-.list{flex:1;overflow-y:auto;background:var(--panel);padding-bottom:var(--home-gap)}
-.section{padding:3px 16px;font-size:14px;font-weight:600;color:var(--muted);background:#f6f6f7}
-.crow{padding:11px 16px;border-bottom:1px solid #ececef;font-size:17px;cursor:pointer}
-.crow b{font-weight:600}
-.crow:active,.thread:active{background:#e9e9ee}
+/* ================== NAV BARS ================== */
+.navbar{position:relative;display:flex;align-items:center;justify-content:center;height:44px;flex-shrink:0;padding:0 6px;
+  background:linear-gradient(var(--nav1),var(--nav2) 50%,#5f7a9c 51%,var(--nav3));border-bottom:1px solid #2d3642}
+.navbar h1{font-size:20px;font-weight:bold;color:#fff;text-shadow:0 -1px 0 rgba(0,0,0,.5)}
+.link{position:absolute;left:6px;top:7px;height:30px;padding:0 10px 0 16px;border:1px solid #375073;border-radius:5px;color:#fff;font-size:12px;font-weight:bold;cursor:pointer;
+  background:linear-gradient(#8ea1bb,#56729a 50%,#4a6890 51%,#58749a);text-shadow:0 -1px 0 rgba(0,0,0,.4);
+  clip-path:polygon(12px 0,100% 0,100% 100%,12px 100%,0 50%)}
+.search{display:flex;align-items:center;gap:6px;padding:7px 8px;background:linear-gradient(#cdd5df,#a6b4c5);border-bottom:1px solid #8a97a8;color:#8a8a8a;flex-shrink:0}
+.search input{flex:1;border:1px solid #8e9aa9;border-radius:15px;background:#fff;font-size:15px;padding:5px 12px;outline:none;font-family:inherit;color:var(--ink)}
+.list{flex:1;overflow-y:auto;background:#fff;padding-bottom:var(--home-gap)}
+.section{padding:2px 12px;font-size:16px;font-weight:bold;color:#fff;background:linear-gradient(#a5b1ba,#8c9ba7);text-shadow:0 1px 0 rgba(0,0,0,.25)}
+.crow{padding:12px 12px;border-bottom:1px solid var(--line);font-size:20px;cursor:pointer}
+.crow b{font-weight:bold}
+.crow:active,.thread:active{background:linear-gradient(#058cf5,#015fe6);color:#fff}
 .empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:15px}
-.thread{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #ececef;cursor:pointer}
-.thread .unread-dot{width:10px;height:10px;border-radius:50%;background:var(--me);flex-shrink:0;visibility:hidden}
+.thread{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.thread .unread-dot{width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#9ccaff,#1f6be0 70%);flex-shrink:0;visibility:hidden}
 .thread.unread .unread-dot{visibility:visible}
 .thread .t-main{flex:1;min-width:0}
 .thread .t-top{display:flex;justify-content:space-between}
-.thread .t-name{font-weight:600;font-size:16px}
-.thread .t-time{font-size:14px;color:var(--muted)}
+.thread .t-name{font-weight:bold;font-size:18px}
+.thread .t-time{font-size:13px;color:var(--blue)}
 .thread .t-last{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(#a0a4ad,#7d818a);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:17px;flex-shrink:0}
+.thread .avatar{display:none}
+.avatar{width:46px;height:46px;border-radius:4px;background:linear-gradient(#d9dde2,#a8adb4);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;flex-shrink:0;border:1px solid #8b9097}
 
 /* ================== CONTACT CARD ================== */
-#card{background:var(--screen)}
-#card .top{background:linear-gradient(#e9e9ee,#f2f2f7);padding:calc(env(safe-area-inset-top) + 10px) 16px 20px;text-align:center}
-#card .top .row{display:flex;justify-content:space-between}
-#card .big{width:96px;height:96px;font-size:36px;margin:10px auto 10px}
-#card .c-name{font-size:28px;font-weight:600}
-#card .actions{display:flex;gap:8px;justify-content:center;margin-top:16px}
-#card .act{width:78px;background:#fff;border:none;border-radius:12px;padding:9px 0 7px;color:var(--me);font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
-#card .act span{font-size:20px}
-#card .act.off{color:#b3b3b8;cursor:default}
-#card .fields{margin:12px 16px;background:#fff;border-radius:12px;overflow:hidden}
-#card .field{padding:10px 14px;border-bottom:1px solid #ececef}
+#card{background:repeating-linear-gradient(90deg,#c5ccd4 0 5px,#cbd2d8 5px 8px)}
+#card .top{padding:0 0 10px}
+#card .card-head{display:flex;align-items:center;gap:12px;padding:14px 12px 4px}
+#card .big{width:64px;height:64px;font-size:26px;border-radius:6px;background:#fff;color:#8a96a3;border:1px solid #8b9097}
+#card .c-name{font-size:20px;font-weight:bold;text-shadow:0 1px 0 rgba(255,255,255,.7)}
+#card .actions{display:flex;gap:8px;justify-content:center;margin:12px 12px 0}
+#card .act{flex:1;background:linear-gradient(#fff,#e9e9e9);border:1px solid #a6a6a6;border-radius:9px;padding:9px 0;color:#385487;font-size:14px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+#card .act span{font-size:16px}
+#card .act.off{color:#a5a5a5;cursor:default}
+#card .fields{margin:10px 12px;background:#fff;border-radius:9px;overflow:hidden;border:1px solid #a6a6a6}
+#card .field{padding:10px 12px;border-bottom:1px solid #d9d9d9;display:flex;gap:12px;align-items:baseline}
 #card .field:last-child{border-bottom:none}
-#card .f-label{font-size:13px;color:var(--ink)}
-#card .f-value{font-size:17px;color:var(--me);margin-top:2px}
-#card .f-value.plain{color:var(--ink);font-size:15px;white-space:pre-wrap}
+#card .f-label{font-size:13px;color:#385487;font-weight:bold;width:62px;text-align:right;flex-shrink:0}
+#card .f-value{font-size:16px;font-weight:bold;color:#000}
+#card .f-value.plain{font-weight:normal;font-size:14px;white-space:pre-wrap}
 
 /* ================== CHAT ================== */
-.chathead{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;background:rgba(249,249,249,.95);border-bottom:1px solid var(--line)}
-.chathead .avatar{width:34px;height:34px;font-size:13px}
-.chathead .who{font-weight:600;font-size:16px}
-.chathead .status{font-size:12px;color:var(--muted)}
-#msgs{flex:1;overflow-y:auto;padding:14px 12px 8px;display:flex;flex-direction:column;gap:4px;background:#fff}
-.bubble{flex-shrink:0;max-width:78%;padding:9px 13px;border-radius:19px;font-size:16px;line-height:1.3;white-space:pre-wrap;word-wrap:break-word;animation:pop .18s ease-out}
+.chathead{position:relative;display:flex;align-items:center;justify-content:center;height:44px;flex-shrink:0;
+  background:linear-gradient(var(--nav1),var(--nav2) 50%,#5f7a9c 51%,var(--nav3));border-bottom:1px solid #2d3642;color:#fff}
+.chathead .avatar{display:none}
+.chathead #chatWho{text-align:center}
+.chathead .who{font-weight:bold;font-size:18px;text-shadow:0 -1px 0 rgba(0,0,0,.5)}
+.chathead .status{font-size:11px;opacity:.9}
+#msgs{flex:1;overflow-y:auto;padding:12px 8px 8px;display:flex;flex-direction:column;gap:6px;background:#dbe2ed}
+.bubble{flex-shrink:0;max-width:76%;padding:7px 13px;border-radius:16px;font-size:16px;line-height:1.28;white-space:pre-wrap;word-wrap:break-word;animation:pop .18s ease-out;
+  border:1px solid rgba(0,0,0,.25);box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 1px 1px rgba(0,0,0,.2)}
 @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:none;opacity:1}}
-.me{align-self:flex-end;background:var(--me);color:#fff;border-bottom-right-radius:6px}
-.them{align-self:flex-start;background:var(--them);border-bottom-left-radius:6px}
-.them a{color:var(--me);font-weight:600}
-.bubble.photo{padding:0;overflow:hidden;background:none;width:78%;max-width:320px}
-.bubble.photo img{display:block;width:100%;border-radius:17px}
-.sysnote{align-self:center;font-size:12px;color:var(--muted);margin:8px 0;text-align:center}
-.failed{align-self:flex-end;font-size:12px;color:var(--red);margin:-1px 4px 6px}
-.typing{align-self:flex-start;background:var(--them);border-radius:19px;padding:12px 14px;display:flex;gap:4px}
-.typing i{width:8px;height:8px;border-radius:50%;background:#999;animation:blink 1.2s infinite}
+.me{align-self:flex-end;background:linear-gradient(var(--green1),#a6e463 50%,var(--green2));border-bottom-right-radius:5px}
+.them{align-self:flex-start;background:linear-gradient(#fff,var(--gray1) 50%,var(--gray2));border-bottom-left-radius:5px}
+.them a{color:var(--blue);font-weight:bold}
+.bubble.photo{padding:3px;width:76%;max-width:300px;background:#fff}
+.bubble.photo img{display:block;width:100%;border-radius:12px}
+.sysnote{align-self:center;font-size:12px;color:#5c6670;margin:8px 0;text-align:center;font-weight:bold}
+.failed{align-self:flex-end;font-size:12px;color:var(--red);margin:-2px 4px 6px;font-weight:bold}
+.typing{align-self:flex-start;background:linear-gradient(#fff,var(--gray2));border:1px solid rgba(0,0,0,.25);border-radius:16px;padding:11px 13px;display:flex;gap:4px}
+.typing i{width:7px;height:7px;border-radius:50%;background:#888;animation:blink 1.2s infinite}
 .typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
-.action{align-self:center;margin:10px 0;padding:11px 18px;border-radius:22px;border:none;background:var(--green);color:#fff;font-size:15px;font-weight:600;cursor:pointer}
-#composer{display:flex;gap:8px;padding:8px 10px calc(env(safe-area-inset-bottom) + var(--home-gap));background:#f9f9f9;border-top:1px solid var(--line)}
-#input{flex:1;border:1px solid var(--line);border-radius:20px;padding:9px 14px;font-size:16px;font-family:inherit;resize:none;max-height:120px;outline:none;background:#fff}
-#send{width:36px;height:36px;border-radius:50%;border:none;background:var(--me);color:#fff;font-size:18px;cursor:pointer;align-self:flex-end}
-#send:disabled{background:#b8d6fb}
-#gpsbar{display:none;align-items:center;gap:8px;padding:7px 12px;font-size:13px;background:#eaf8ee;color:#1d6b34;border-top:1px solid #cdebd6}
-#gpsbar .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:blink 1.6s infinite}
-#gpsbar button{margin-left:auto;border:none;background:none;color:var(--me);font-size:13px;font-weight:600;cursor:pointer}
+.action{align-self:center;margin:10px 0;padding:10px 18px;border-radius:10px;border:1px solid #2f5f12;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;
+  background:linear-gradient(#9fe063,#5bb31d 50%,#4ea312 51%,#64b82a);text-shadow:0 -1px 0 rgba(0,0,0,.35)}
+#composer{display:flex;gap:6px;padding:6px 6px calc(env(safe-area-inset-bottom) + var(--home-gap));background:linear-gradient(#e2e5ea,#b9bfc8);border-top:1px solid #8b919a;align-items:flex-end}
+#input{flex:1;border:1px solid #8b919a;border-radius:15px;padding:7px 12px;font-size:16px;font-family:inherit;resize:none;max-height:120px;outline:none;background:#fff;box-shadow:inset 0 1px 2px rgba(0,0,0,.25)}
+#send{height:32px;padding:0 12px;border-radius:7px;border:1px solid #2b4c80;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;
+  background:linear-gradient(#8fb2e8,#3d6fc1 50%,#2f5fb3 51%,#4473c3);text-shadow:0 -1px 0 rgba(0,0,0,.4)}
+#send:disabled{opacity:.55}
+#gpsbar{display:none;align-items:center;gap:8px;padding:6px 10px;font-size:13px;background:linear-gradient(#fdf6c9,#efe08a);color:#5a4a00;border-top:1px solid #c9b64e;font-weight:bold}
+#gpsbar .dot{width:8px;height:8px;border-radius:50%;background:#3a9b1a;animation:blink 1.6s infinite}
+#gpsbar button{margin-left:auto;border:1px solid #2b4c80;border-radius:6px;padding:4px 8px;color:#fff;font-size:12px;font-weight:bold;cursor:pointer;background:linear-gradient(#8fb2e8,#2f5fb3)}
 
 /* ================== DEBUG ================== */
 #debug{position:fixed;bottom:8px;left:8px;z-index:99;display:none;gap:6px;flex-wrap:wrap;max-width:360px}
@@ -144,77 +180,73 @@ button{font-family:inherit}
 <body>
 <div id="phone">
 
+  <!-- STATUS BAR -->
+  <div id="sbar"><span class="sb-l"><span class="bars"><i style="height:3px"></i><i style="height:5px"></i><i style="height:7px"></i><i style="height:9px"></i><i style="height:10px;opacity:.35"></i></span>Optus <b>E</b></span><span id="sbTime"></span><span class="bat"><i></i></span></div>
+
   <!-- LOCK SCREEN -->
   <section id="lock" class="screen active">
-    <div class="clock" id="clock">9:41</div>
-    <div class="date" id="date"></div>
-    <div class="prompt">Enter Passcode</div>
-    <div id="dots"><span></span><span></span><span></span><span></span></div>
-    <div id="pad"></div>
+    <div class="lk-top">
+      <div class="clock" id="clock">9:41</div>
+      <div class="date" id="date"></div>
+    </div>
+    <div class="lk-bottom">
+      <div class="slider" id="slider"><div class="knob" id="knob">&#10140;</div><span class="slide-text">slide to unlock</span></div>
+    </div>
+    <div class="passpanel" id="passpanel">
+      <div class="pp-title">Enter Passcode</div>
+      <div id="dots"><span></span><span></span><span></span><span></span></div>
+      <div id="pad"></div>
+    </div>
   </section>
 
   <!-- HOME SCREEN -->
   <section id="home" class="screen">
-    <div class="widget">
-      <div class="w-day" id="wDay"></div>
-      <div class="w-date" id="wDate"></div>
-      <div class="w-sub">Bondi · 21° · Light southerly</div>
-    </div>
     <div class="grid" id="appGrid"></div>
     <div class="dock" id="dock"></div>
   </section>
 
   <!-- CONTACTS -->
   <section id="contacts" class="screen">
-    <div class="navbar">
-      <div class="row"><button class="link back-btn">‹ Home</button><span></span></div>
-      <h1>Contacts</h1>
-      <div class="search">🔍<input id="csearch" type="search" placeholder="Search" autocomplete="off"></div>
-    </div>
+    <div class="navbar"><button class="link back-btn">Home</button><h1>All Contacts</h1></div>
+    <div class="search">&#128269;<input id="csearch" type="search" placeholder="Search" autocomplete="off"></div>
     <div class="list" id="contactList"></div>
   </section>
 
   <!-- CONTACT CARD -->
   <section id="card" class="screen">
+    <div class="navbar"><button class="link back-btn" id="cardBack">All Contacts</button><h1>Info</h1></div>
     <div class="top">
-      <div class="row"><button class="link back-btn" id="cardBack">‹ Contacts</button><span></span></div>
-      <div class="avatar big" id="cardAvatar"></div>
-      <div class="c-name" id="cardName"></div>
+      <div class="card-head"><div class="avatar big" id="cardAvatar"></div><div class="c-name" id="cardName"></div></div>
+      <div class="fields" id="cardFields"></div>
       <div class="actions">
-        <button class="act" id="actMsg"><span>💬</span>message</button>
-        <button class="act off"><span>📞</span>call</button>
-        <button class="act off"><span>🎥</span>video</button>
-        <button class="act off"><span>✉️</span>mail</button>
+        <button class="act" id="actMsg"><span>&#128172;</span>Text Message</button>
+        <button class="act off"><span>&#128222;</span>Call</button>
       </div>
     </div>
-    <div class="fields" id="cardFields"></div>
   </section>
 
   <!-- MESSAGES (thread list) -->
   <section id="messages" class="screen">
-    <div class="navbar">
-      <div class="row"><button class="link back-btn">‹ Home</button><span></span></div>
-      <h1>Messages</h1>
-    </div>
+    <div class="navbar"><button class="link back-btn">Home</button><h1>Text Messages</h1></div>
     <div class="list" id="threadList"></div>
   </section>
 
   <!-- CHAT -->
   <section id="chat" class="screen">
     <div class="chathead">
-      <button class="link back-btn" id="chatBack">‹</button>
+      <button class="link back-btn" id="chatBack">Messages</button>
       <div class="avatar" id="chatAvatar" style="cursor:pointer"></div>
       <div id="chatWho" style="cursor:pointer"><div class="who" id="chatName"></div><div class="status" id="status"></div></div>
     </div>
     <div id="msgs"></div>
-    <div id="gpsbar"><span class="dot"></span><span id="gpstext">Sharing location with Paddy</span><button id="imhere">I'm here</button></div>
+    <div id="gpsbar"><span class="dot"></span><span id="gpstext">Sharing location</span><button id="imhere">I'm here</button></div>
     <div id="composer">
-      <textarea id="input" rows="1" placeholder="Text Message"></textarea>
-      <button id="send" disabled>↑</button>
+      <textarea id="input" rows="1" placeholder=""></textarea>
+      <button id="send" disabled>Send</button>
     </div>
   </section>
 
-  <div id="banner"><div class="ico">💬</div><div><div class="b-title" id="bTitle"></div><div class="b-text" id="bText"></div></div></div>
+  <div id="banner"><div class="ico"></div><div><div class="b-title" id="bTitle"></div><div class="b-text" id="bText"></div><div class="b-btns"><span>Close</span><span>View</span></div></div></div>
   <div id="homebar"><i></i></div>
 </div>
 
@@ -265,7 +297,7 @@ const CONFIG = {
   NEXT_LINK: "https://example.com/next-stage",
   NEXT_LINK_LABEL: "Grandfather's papers",
 
-  STORAGE_KEY: "bondi-phone-v3"
+  STORAGE_KEY: "bondi-phone-v4"   // v4 = new story (Adam's own phone)
 };
 
 /* Photo Paddy sends when players ask for help (embedded so it works offline) */
@@ -275,16 +307,17 @@ const IMAGES = { frangipani: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD
    CONTACTS — fictional numbers from the ACMA range reserved for fiction
    ===================================================================== */
 const PEOPLE = [
-  {id:"maureen", first:"Maureen", last:"(Aunty)", phone:"0491 570 006"},
-  {id:"surfclub", first:"Bondi Surf Club", last:"", phone:"(02) 5550 1906", company:true},
+  // Adam's family (see the family tree in the notebook): Eileen & Rose are his daughters,
+  // Kate & Paddy are Eileen's children, Mick is Rose's son. Paddy (Patrick Keogh) is the one to contact.
+  {id:"eileen", first:"Eileen", last:"", phone:"0491 570 006"},
+  {id:"rose", first:"Rose", last:"", phone:"0491 570 159"},
+  {id:"kate", first:"Kate", last:"", phone:"0491 570 158"},
+  {id:"mick", first:"Mick", last:"", phone:"0491 570 157"},
+  {id:"paddy", first:"Paddy", last:"", phone:"0491 570 110", notes:"Text only — never picks up."},
   {id:"brendan", first:"Brendan", last:"Plumber", phone:"0491 570 156"},
   {id:"walsh", first:"Dr", last:"Walsh", phone:"(02) 5550 4412"},
-  {id:"kev", first:"Kev", last:"from the Bowlo", phone:"0491 570 157"},
-  {id:"mum", first:"Mum", last:"", phone:"0491 570 158"},
-  {id:"nan", first:"Nan", last:"", phone:"0491 570 159"},
-  {id:"paddy", first:"Paddy", last:"Keogh", phone:"0491 570 110",
-     notes:"North Bondi. Early swim every morning.\nOld friend of Sam F.\nDoesn't answer calls — text only."},
-  {id:"sheila", first:"Sheila", last:"next door", phone:"0491 570 313"},
+  {id:"kev", first:"Kev", last:"from the Bowlo", phone:"0491 570 313"},
+  {id:"sheila", first:"Sheila", last:"next door", phone:"0491 570 314"},
   {id:"taxi", first:"Taxi", last:"Eastern Suburbs", phone:"(02) 5550 1234", company:true},
   {id:"council", first:"Waverley Council", last:"", phone:"(02) 5550 1882", company:true}
 ];
@@ -294,9 +327,10 @@ const initials = p => p.company ? p.first.split(" ").slice(0,2).map(w=>w[0]).joi
 
 // Pre-existing conversations on the phone (flavour, read-only)
 const SEED_THREADS = {
-  mum:     {time:"Yesterday", msgs:[{t:"them",text:"Are you still coming Sunday?"},{t:"me",text:"Yes, I'll bring dessert"},{t:"them",text:"Don't forget Sunday lunch x"}]},
-  council: {time:"Friday",    msgs:[{t:"them",text:"Waverley Council: Your records request has been received. Ref #1882-OB. Allow 10 business days."}]},
-  surfclub:{time:"Tuesday",   msgs:[{t:"them",text:"Reminder: training moved to 6am this week. Bring your cap."}]}
+  eileen:  {time:"14/03/08", msgs:[{t:"them",text:"Dad, the plumber's coming Tuesday. I'll let him in."},{t:"me",text:"Thanks love."}]},
+  kate:    {time:"09/03/08", msgs:[{t:"them",text:"See you Sunday Grandad x"}]},
+  council: {time:"07/03/08", msgs:[{t:"them",text:"Waverley Council: reminder — all strongroom keys to be returned before your last day. Ref #1882-OB"}]},
+  kev:     {time:"05/03/08", msgs:[{t:"them",text:"Bowls Thursday? Your shout."}]}
 };
 
 /* =====================================================================
@@ -304,19 +338,19 @@ const SEED_THREADS = {
    ===================================================================== */
 const PADDY = {
   wrong: [
-    "Liam? I thought you'd lost your phone. Who's this?",
-    "I don't talk to people I don't know.",
+    "Who is this? This was my grandad's number.",
+    "My grandad died last year. This isn't funny.",
     "If you're from the council, you can leave me alone.",
-    "Sam always said words matter. Yours don't mean anything to me.",
+    "Grandad always said words matter. Yours don't mean anything to me.",
     "Still don't know you, mate."
   ],
   accepted: [
     "…",
-    "Sam's words... our Liam knows them too. If he trusted you with his phone, maybe I can too.",
-    "I think I know why you're writing to me.",
-    "I've been waiting years for someone to come asking.",
+    "Sam's words. Grandad's favourite. Only the people he trusted ever knew them.",
+    "So you've got his notebook. I think I know why you're writing to me.",
+    "I've been waiting for someone to come asking.",
     "But quoting Sam is one thing. Let's see if you're really Bondi people.",
-    "My old man flew with the boys in blue in the war. Every kid around here grew up with their motto.",
+    "My great-grandad flew with the boys in blue in the war. Grandad made me learn their motto before I could read.",
     "What's the motto of the Royal Air Force?"
   ],
   // Question 1 — RAF motto
@@ -332,12 +366,12 @@ const PADDY = {
     "Still no. Ask me if you need a nudge."
   ],
   mottoHint: [
-    "Forgotten already? Kids these days.",
+    "Forgotten already? Grandad would be ashamed of you.",
     "Go and pay your respects at the North Bondi War Memorial. The motto is written there, for the airmen."
   ],
   // Question 2 — oldest surf life saving club (North Bondi, 1906)
   clubOk: [
-    "1906. North Bondi. My old club, and don't let the Bondi lot tell you otherwise.",
+    "1906. North Bondi. My club, and don't let the Bondi lot tell you otherwise.",
     "Alright. You've done your homework.",
     "But I don't know you. I don't tell anyone anything until I've looked them in the eye.",
     "Meet me on the promenade, in front of the Frangipani Girl. She's painted on the sea wall.",
@@ -369,7 +403,7 @@ const PADDY = {
     "Go and stand there. I'll know when you do."
   ],
   checkTravelling: "Where The Homestead stood. It's all in Adam's notebook.",
-  checkHelp: ["Read the old papers in the notebook. Adam kept everything.", "The house is long gone. Something else stands there now."],
+  checkHelp: ["Read the old papers in the notebook. Grandad kept everything.", "The house is long gone. Something else stands there now."],
   checkNotHereFar: "Not even close. Read the notebook again.",
   checkNotHereNear: "Nearly. Where The Homestead stood, exactly.",
   // At the Homestead site: final message + link
@@ -411,10 +445,10 @@ function show(id){
 /* ================== LOCK SCREEN ================== */
 function tickClock(){
   const d = new Date();
-  $("clock").textContent = d.getHours() + ":" + String(d.getMinutes()).padStart(2,"0");
+  const h12 = d.getHours()%12 || 12, mm = String(d.getMinutes()).padStart(2,"0");
+  $("clock").textContent = h12 + ":" + mm;
   $("date").textContent = d.toLocaleDateString("en-AU",{weekday:"long", day:"numeric", month:"long"});
-  $("wDay").textContent = d.toLocaleDateString("en-AU",{weekday:"long"});
-  $("wDate").textContent = d.toLocaleDateString("en-AU",{day:"numeric", month:"long"});
+  $("sbTime").textContent = h12 + ":" + mm + " " + (d.getHours()<12 ? "AM" : "PM");
 }
 tickClock(); setInterval(tickClock, 10000);
 
@@ -422,10 +456,24 @@ let entry = "";
 ["1","2","3","4","5","6","7","8","9","","0","del"].forEach(k=>{
   const b = document.createElement("button");
   if(k===""){ b.className="blank"; }
-  else if(k==="del"){ b.className="del"; b.textContent="Delete"; b.onclick=()=>{ entry=entry.slice(0,-1); renderDots(); }; }
+  else if(k==="del"){ b.className="del"; b.textContent="⌫"; b.onclick=()=>{ entry=entry.slice(0,-1); renderDots(); }; }
   else { b.textContent=k; b.onclick=()=>press(k); }
   $("pad").appendChild(b);
 });
+// ---- slide to unlock (iPhone OS 1)
+(function(){
+  const knob = $("knob"), track = $("slider"); let x0 = null, dx = 0;
+  const max = () => track.clientWidth - knob.offsetWidth - 6;
+  function end(){
+    if(x0===null) return;
+    if(dx >= max()*0.85){ $("passpanel").classList.add("show"); }
+    knob.style.transition = "left .25s"; knob.style.left = "3px"; setTimeout(()=>knob.style.transition="",260);
+    x0 = null; dx = 0;
+  }
+  knob.addEventListener("pointerdown", e=>{ x0 = e.clientX; knob.setPointerCapture(e.pointerId); });
+  knob.addEventListener("pointermove", e=>{ if(x0===null) return; dx = Math.max(0, Math.min(max(), e.clientX - x0)); knob.style.left = (3+dx) + "px"; });
+  knob.addEventListener("pointerup", end); knob.addEventListener("pointercancel", end);
+})();
 function renderDots(){ [...$("dots").children].forEach((s,i)=>s.classList.toggle("on", i<entry.length)); }
 function press(k){
   if(entry.length>=4) return;
@@ -441,20 +489,24 @@ function press(k){
 
 /* ================== HOME SCREEN ================== */
 const APPS = [
-  {name:"Photos",   icon:"🌸", bg:"#fff"},
-  {name:"Camera",   icon:"📷", bg:"linear-gradient(#d9d9de,#a9a9b0)"},
-  {name:"Maps",     icon:"🗺️", bg:"linear-gradient(#b7f0a8,#7ccf6c)"},
-  {name:"Weather",  icon:"⛅", bg:"linear-gradient(#4fa3f7,#1f6fd1)"},
-  {name:"Clock",    icon:"🕰️", bg:"#1c1c1e"},
-  {name:"Notes",    icon:"📝", bg:"linear-gradient(#fff6c2,#ffd84d)"},
-  {name:"Calendar", icon:"📅", bg:"#fff"},
-  {name:"Settings", icon:"⚙️", bg:"linear-gradient(#b0b0b6,#86868c)"}
+  {name:"Text",       icon:"💬", bg:"linear-gradient(#a6e86c,#3fa313)", open:()=>go("messages"), badge:true},
+  {name:"Calendar",   icon:"📅", bg:"linear-gradient(#fff,#ddd)"},
+  {name:"Photos",     icon:"🌻", bg:"linear-gradient(#7ec0ff,#2f6fd1)"},
+  {name:"Camera",     icon:"📷", bg:"linear-gradient(#bbb,#555)"},
+  {name:"YouTube",    icon:"📺", bg:"linear-gradient(#ff8a80,#c4120b)"},
+  {name:"Stocks",     icon:"📈", bg:"linear-gradient(#555,#111)"},
+  {name:"Maps",       icon:"🗺️", bg:"linear-gradient(#d8f0b8,#7cb342)"},
+  {name:"Weather",    icon:"⛅", bg:"linear-gradient(#7fbaf5,#1f5fbf)"},
+  {name:"Clock",      icon:"🕰️", bg:"linear-gradient(#444,#000)"},
+  {name:"Calculator", icon:"🔢", bg:"linear-gradient(#ffb74d,#e65100)"},
+  {name:"Notes",      icon:"📝", bg:"linear-gradient(#fff6c2,#f2c94c)"},
+  {name:"Settings",   icon:"⚙️", bg:"linear-gradient(#c8c8c8,#7d7d7d)"}
 ];
 const DOCK = [
-  {name:"Phone",    icon:"📞", bg:"linear-gradient(#65e36f,#2fbf45)"},
-  {name:"Safari",   icon:"🧭", bg:"#fff"},
-  {name:"Messages", icon:"💬", bg:"linear-gradient(#65e36f,#2fbf45)", open:()=>go("messages"), badge:true},
-  {name:"Contacts", icon:"👤", bg:"linear-gradient(#d8d8dd,#b9b9bf)", open:()=>go("contacts")}
+  {name:"Phone",  icon:"📞", bg:"linear-gradient(#a6e86c,#3fa313)", open:()=>go("contacts")},
+  {name:"Mail",   icon:"✉️", bg:"linear-gradient(#9fd0ff,#2b7be0)"},
+  {name:"Safari", icon:"🧭", bg:"linear-gradient(#cfe8ff,#4a90e2)"},
+  {name:"iPod",   icon:"🎵", bg:"linear-gradient(#ffa64d,#e65c00)"}
 ];
 function buildApp(a){
   const el = document.createElement("button"); el.className="app";
@@ -557,7 +609,7 @@ $("chatAvatar").onclick = $("chatWho").onclick = ()=>{ if(chatWith) go("card", c
    screen. The browser / Android back button is wired to the same stack. */
 let stack = [];
 let histOK = true, ignorePop = 0;
-const BACK_LABEL = {home:"Home", contacts:"Contacts", messages:"Messages", card:"Contact", chat:"Back"};
+const BACK_LABEL = {home:"Home", contacts:"All Contacts", messages:"Messages", card:"Info", chat:"Back"};
 function render(e, fresh){
   if(e.name==="home") goHome();
   else if(e.name==="contacts") openContacts(fresh);
@@ -565,7 +617,7 @@ function render(e, fresh){
   else if(e.name==="messages") openMessages();
   else if(e.name==="chat") openChat(e.arg);
   const prev = stack[stack.length-2];
-  document.querySelectorAll(".back-btn").forEach(b=>{ b.textContent = "‹ " + (prev ? BACK_LABEL[prev.name] : "Home"); });
+  document.querySelectorAll(".back-btn").forEach(b=>{ b.textContent = (prev ? BACK_LABEL[prev.name] : "Home"); });
 }
 function pushHist(){ try{ history.pushState({d:stack.length}, ""); }catch(e){ histOK = false; } }
 function go(name, arg){
@@ -615,11 +667,11 @@ function pushPaddy(m){
 /* ---------- notification banner ---------- */
 let bannerTimer = null;
 function notify(text){
-  $("bTitle").textContent = "Paddy Keogh"; $("bText").textContent = text;
+  $("bTitle").textContent = fullName(P("paddy")); $("bText").textContent = text;
   $("banner").classList.add("show");
-  clearTimeout(bannerTimer); bannerTimer = setTimeout(()=>$("banner").classList.remove("show"), 4500);
+  clearTimeout(bannerTimer); bannerTimer = setTimeout(()=>$("banner").classList.remove("show"), 6000);
 }
-$("banner").onclick = ()=>{ $("banner").classList.remove("show"); if(current!=="lock") go("chat","paddy"); };
+$("banner").onclick = e=>{ $("banner").classList.remove("show"); if(e.target.textContent!=="Close" && current!=="lock") go("chat","paddy"); };
 
 // Paddy types a sequence of lines with realistic delays
 let busy = false;
@@ -809,7 +861,7 @@ $("imhere").onclick = ()=>{
     checkPosition(pos);
     if(walking()){
       const d = Math.round(distance({lat:pos.coords.latitude,lng:pos.coords.longitude}, currentTarget().pt));
-      $("gpstext").textContent = "Sharing location with Paddy";
+      $("gpstext").textContent = "Sharing location";
       const v = state.stage==="verify";
       paddySays([ d>400 ? (v ? PADDY.checkNotHereFar : PADDY.notHereFar) : (v ? PADDY.checkNotHereNear : PADDY.notHereNear) ]);
     }
