@@ -308,17 +308,23 @@ const IMAGES = { frangipani: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD
    ===================================================================== */
 const PEOPLE = [
   // Adam's family (see the family tree + Eleanor's notes in the notebook): Eileen, Thomas & Rose are his children,
-  // Kate & Patrick ("Paddy") are Eileen's children, Mick is Rose's son (Thomas's two boys are not in the phone). Paddy (Patrick Keogh) is the one to contact.
+  // Kate & Patrick ("Paddy") are Eileen's children, Mick is Rose's son (Thomas's two boys are not in the phone).
   {id:"eileen", first:"Eileen", last:"", phone:"0491 570 006"},
+  {id:"thomas", first:"Thomas", last:"", phone:"0491 570 737"},
   {id:"rose", first:"Rose", last:"", phone:"0491 570 159"},
-  {id:"thomas", first:"Thomas", last:"", phone:"0491 570 160"},
   {id:"kate", first:"Kate", last:"", phone:"0491 570 158"},
   {id:"mick", first:"Mick", last:"", phone:"0491 570 157"},
-  {id:"paddy", first:"Patrick", last:"Keogh", phone:"0491 570 110", notes:"Text only — never picks up."},
-  {id:"brendan", first:"Brendan", last:"Plumber", phone:"0491 570 156"},
+  {id:"paddy", first:"Patrick", last:"Keogh", phone:"0491 570 110", notes:"Text only \u2014 never picks up."},
+  // Friends, neighbours and everyday contacts (flavour only)
+  {id:"gary", first:"Gary", last:"Thompson", phone:"0491 570 313"},
+  {id:"bev", first:"Bev", last:"(Bowls)", phone:"(02) 5550 2211"},
+  {id:"kev", first:"Kev", last:"from the Bowlo", phone:"0491 570 156"},
+  {id:"sheila", first:"Sheila", last:"next door", phone:"(02) 5550 3317"},
+  {id:"joanray", first:"Joan & Ray", last:"(No. 14)", phone:"(02) 5550 3320"},
+  {id:"brendan", first:"Brendan", last:"the plumber", phone:"0491 570 808"},
+  {id:"mario", first:"Mario", last:"the barber", phone:"(02) 5550 6610"},
   {id:"walsh", first:"Dr", last:"Walsh", phone:"(02) 5550 4412"},
-  {id:"kev", first:"Kev", last:"from the Bowlo", phone:"0491 570 313"},
-  {id:"sheila", first:"Sheila", last:"next door", phone:"0491 570 314"},
+  {id:"library", first:"Waverley Library", last:"", phone:"(02) 5550 1880", company:true},
   {id:"taxi", first:"Taxi", last:"Eastern Suburbs", phone:"(02) 5550 1234", company:true},
   {id:"council", first:"Waverley Council", last:"", phone:"(02) 5550 1882", company:true}
 ];
@@ -329,9 +335,17 @@ const initials = p => p.company ? p.first.split(" ").slice(0,2).map(w=>w[0]).joi
 // Pre-existing conversations on the phone (flavour, read-only)
 const SEED_THREADS = {
   eileen:  {time:"14/03/08", msgs:[{t:"them",text:"Dad, the plumber's coming Tuesday. I'll let him in."},{t:"me",text:"Thanks love."}]},
+  brendan: {time:"13/03/08", msgs:[{t:"them",text:"Running 20 min late mate, traffic on Bondi Rd."}]},
+  sheila:  {time:"12/03/08", msgs:[{t:"them",text:"Can you water my tomatoes Tues to Thurs? Key's under the pot. Ta!"},{t:"me",text:"No worries Sheila."}]},
+  gary:    {time:"11/03/08", msgs:[{t:"them",text:"Footy at the Bowlo Saturday? Bring the esky."},{t:"me",text:"Only if Kev's not cooking."}]},
   kate:    {time:"09/03/08", msgs:[{t:"them",text:"See you Sunday Grandad x"}]},
-  council: {time:"07/03/08", msgs:[{t:"them",text:"Waverley Council: reminder — all strongroom keys to be returned before your last day. Ref #1882-OB"}]},
-  kev:     {time:"05/03/08", msgs:[{t:"them",text:"Bowls Thursday? Your shout."}]}
+  mario:   {time:"08/03/08", msgs:[{t:"them",text:"Reminder: haircut Thursday 10am. Reply Y to confirm."},{t:"me",text:"Y"}]},
+  council: {time:"07/03/08", msgs:[{t:"them",text:"Waverley Council: reminder \u2014 all strongroom keys to be returned before your last day. Ref #1882-OB"}]},
+  joanray: {time:"06/03/08", msgs:[{t:"them",text:"Your bins were still out, we wheeled them back in for you. Joan"}]},
+  bev:     {time:"05/03/08", msgs:[{t:"them",text:"Pennant draw is up. You're with Kev on Saturday, 1pm sharp."}]},
+  kev:     {time:"05/03/08", msgs:[{t:"them",text:"Bowls Thursday? Your shout."}]},
+  library: {time:"03/03/08", msgs:[{t:"them",text:"Waverley Library: your item 'A History of Waverley' is overdue. Please return or renew."}]},
+  walsh:   {time:"28/02/08", msgs:[{t:"them",text:"Reminder: appointment with Dr Walsh, Monday 9:15am."}]}
 };
 
 /* =====================================================================
@@ -369,7 +383,7 @@ const PADDY = {
   ],
   mottoHint: [
     "Forgotten already? Grandad would be ashamed of you.",
-    "Go and pay your respects at the North Bondi War Memorial. The motto is written there, for the airmen."
+    "Go and pay your respects at the North Bondi War Memorial, next to Biddigal Reserve, across the roundabout. The motto is written there, for the airmen."
   ],
   // Question 2 — oldest surf life saving club (North Bondi, 1906)
   clubOk: [
