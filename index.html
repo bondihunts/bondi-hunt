@@ -234,6 +234,19 @@ const CONFIG = {
   QUOTE: "I am better than no man, and no man is better than I am",
   QUOTE_TOLERANCE: 0.15,
 
+  // Paddy's two loyalty questions, asked once the quote is accepted.
+  // 1) Motto of the Royal Air Force (on the North Bondi War Memorial).
+  MOTTO: "Per ardua ad astra",
+  MOTTO_TOLERANCE: 0.2,          // ≈ 3 letters of typos allowed
+  // 2) Founding year of the oldest life saving club on Bondi Beach:
+  //    North Bondi SLSC = 1906 (vs Bondi Surf Bathers LSC = February 1907).
+  CLUB_YEAR: "1906",
+  CLUB_DECOY: "1907",            // the Bondi Surf Bathers year gets a special reply
+
+  // Words that count as asking Paddy for a hint during the two questions
+  // ("?" alone also counts, unless the message already contains the right answer)
+  HINT_WORDS: ["help","hint","clue","forgot","forget","remember","memory","dont know","don t know","no idea","idk","which","where","cant","can t","not sure"],
+
   // Meeting point: the Frangipani Girl mural on the Bondi sea wall (promenade).
   // 33°53'29.9"S 151°16'31.1"E (measured on site)
   TARGET: { lat: -33.891639, lng: 151.275306 },
@@ -302,9 +315,46 @@ const PADDY = {
     "Sam's words... our Liam knows them too. If he trusted you with his phone, maybe I can too.",
     "I think I know why you're writing to me.",
     "I've been waiting years for someone to come asking.",
+    "But quoting Sam is one thing. Let's see if you're really Bondi people.",
+    "My old man flew with the boys in blue in the war. Every kid around here grew up with their motto.",
+    "What's the motto of the Royal Air Force?"
+  ],
+  // Question 1 — RAF motto
+  mottoOk: [
+    "Per ardua ad astra. Through adversity, to the stars.",
+    "Good. Keep those stars in mind, you never know.",
+    "One more. Lifesavers are family on this beach, and two clubs have been squabbling for a hundred years over who came first.",
+    "In what year was the oldest life saving club in Bondi founded?"
+  ],
+  mottoWrong: [
+    "No. That's not it.",
+    "Wrong again. If your memory fails you, ask me.",
+    "Still no. Ask me if you need a nudge."
+  ],
+  mottoHint: [
+    "Forgotten already? Kids these days.",
+    "Go and pay your respects at the North Bondi War Memorial. The motto is written there, for the airmen."
+  ],
+  // Question 2 — oldest surf life saving club (North Bondi, 1906)
+  clubOk: [
+    "1906. North Bondi. My old club, and don't let the Bondi lot tell you otherwise.",
+    "Alright. You've done your homework.",
     "But I don't know you. I don't tell anyone anything until I've looked them in the eye.",
     "Meet me on the promenade, in front of the Frangipani Girl. She's painted on the sea wall.",
     "Share your location so I know you're coming."
+  ],
+  clubDecoy: [
+    "Ha. That's what the Bondi Surf Bathers will tell you.",
+    "Have a look at the other club before you believe them."
+  ],
+  clubWrong: [
+    "No. Not even close.",
+    "Wrong. Ask me if you need a hint.",
+    "Still no. Ask me if you need a hint."
+  ],
+  clubHint: [
+    "There are two surf clubs on this beach. Each one wears its founding date on its clubhouse.",
+    "Compare North Bondi Surf Life Saving Club with Bondi Surf Bathers Life Saving Club. The older one wins."
   ],
   locationOk: ["Good. I'll be watching for you.", "If you can't find her, just ask."],
   locationDenied: ["No location, no meeting. I'm not a fool.", "Try again when you've made up your mind."],
@@ -335,8 +385,9 @@ const PADDY = {
 /* =====================================================================
    STATE (persisted so a page reload doesn't reset progress)
    ===================================================================== */
-let state = {unlocked:false, stage:"quote", paddy:[], extra:{}, wrongCount:0, unread:0};
-// stages: quote -> location -> travelling (Frangipani Girl) -> verify (Homestead site) -> done
+let state = {unlocked:false, stage:"quote", paddy:[], extra:{}, wrongCount:0, qWrong:0, unread:0};
+// stages: quote -> motto (RAF motto) -> club (oldest surf club, 1906) -> location
+//         -> travelling (Frangipani Girl) -> verify (Homestead site) -> done
 const walking = () => state.stage==="travelling" || state.stage==="verify";
 const currentTarget = () => state.stage==="verify"
   ? {pt:CONFIG.CHECK, r:CONFIG.CHECK_RADIUS_M} : {pt:CONFIG.TARGET, r:CONFIG.RADIUS_M};
@@ -611,12 +662,39 @@ async function sendMsg(){
 
   if(state.stage==="quote"){
     if(matchesQuote(text)){
-      state.stage = "location"; save();
+      state.stage = "motto"; state.qWrong = 0; save();
       await paddySays(PADDY.accepted);
-      updateStageUI();
     } else {
       const line = PADDY.wrong[Math.min(state.wrongCount, PADDY.wrong.length-1)];
       state.wrongCount++; save();
+      await paddySays([line]);
+    }
+  } else if(state.stage==="motto"){
+    // Question 1: RAF motto. A right answer always wins, even with a "?".
+    if(matchesPhrase(text, CONFIG.MOTTO, CONFIG.MOTTO_TOLERANCE)){
+      state.stage = "club"; state.qWrong = 0; save();
+      await paddySays(PADDY.mottoOk);
+    } else if(isHintRequest(text)){
+      await paddySays(PADDY.mottoHint);
+    } else {
+      const line = PADDY.mottoWrong[Math.min(state.qWrong, PADDY.mottoWrong.length-1)];
+      state.qWrong++; save();
+      await paddySays([line]);
+    }
+  } else if(state.stage==="club"){
+    // Question 2: founding year of the oldest surf club (North Bondi, 1906)
+    const years = text.match(/\b1[89]\d\d\b/g) || [];
+    if(years.includes(CONFIG.CLUB_YEAR)){
+      state.stage = "location"; state.qWrong = 0; save();
+      await paddySays(PADDY.clubOk);
+      updateStageUI();
+    } else if(years.includes(CONFIG.CLUB_DECOY)){
+      await paddySays(PADDY.clubDecoy);
+    } else if(!years.length && isHintRequest(text)){
+      await paddySays(PADDY.clubHint);
+    } else {
+      const line = PADDY.clubWrong[Math.min(state.qWrong, PADDY.clubWrong.length-1)];
+      state.qWrong++; save();
       await paddySays([line]);
     }
   } else if(state.stage==="location"){
@@ -635,6 +713,11 @@ function isHelp(text){
   const t = " " + norm(text).replace(/\s+/g," ") + " ";
   return text.includes("?") || CONFIG.HELP_WORDS.some(w => t.includes(" " + w));
 }
+/* ---------- hint requests during Paddy's two questions ---------- */
+function isHintRequest(text){
+  const t = " " + norm(text).replace(/\s+/g," ") + " ";
+  return text.includes("?") || CONFIG.HINT_WORDS.some(w => t.includes(" " + w));
+}
 
 /* ---------- fuzzy keyword matching ---------- */
 function norm(s){ return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9\s]/g," "); }
@@ -649,9 +732,12 @@ function canon(t){
     .replace(/\bi\s*m\b/g,"i am").replace(/\bim\b/g,"i am")
     .split(/\s+/).filter(Boolean);
 }
-function matchesQuote(text){
-  const target = canon(CONFIG.QUOTE), words = canon(text);
-  const goal = target.join(" "), maxErr = Math.round(goal.length * CONFIG.QUOTE_TOLERANCE);
+function matchesQuote(text){ return matchesPhrase(text, CONFIG.QUOTE, CONFIG.QUOTE_TOLERANCE); }
+function matchesPhrase(text, phrase, tolerance){
+  const target = canon(phrase), words = canon(text);
+  const goal = target.join(" "), maxErr = Math.round(goal.length * tolerance);
+  // also accept the phrase typed without spaces ("perarduaadastra")
+  if(words.join("").length && lev(words.join(""), target.join("")) <= maxErr) return true;
   const n = target.length;
   // compare the quote against every window of the message of similar length
   for(let len=Math.max(1,n-2); len<=n+2; len++){
@@ -755,6 +841,9 @@ if(DEBUG){
   dbg.innerHTML = `<div class="info">debug mode · stage: ${state.stage}</div>`;
   [["Reset game",()=>{ try{localStorage.removeItem(CONFIG.STORAGE_KEY);}catch(e){} location.reload(); }],
    ["Skip lock",()=>{ state.unlocked=true; save(); resetNav(); }],
+   ["Skip to questions",()=>{ state.unlocked=true; state.stage="motto"; state.qWrong=0;
+      if(!state.paddy.length) state.paddy.push({t:"them", text:PADDY.accepted[PADDY.accepted.length-1]});
+      save(); resetNav(); go("chat","paddy"); }],
    ["Simulate arrival",()=>{ if(!walking()){ state.stage="travelling"; save(); } arrive(); }],
    ...[100,40,10].map(m=>[`Fake ${m} m`,()=>{
       if(!walking()){ state.stage="travelling"; save(); updateStageUI(); }
