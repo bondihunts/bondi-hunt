@@ -338,12 +338,13 @@ const SEED_THREADS = {
    ===================================================================== */
 const PADDY = {
   wrong: [
-    "Who is this? This was my grandad's number.",
-    "My grandad died last year. This isn't funny.",
-    "If you're from the council, you can leave me alone.",
+    ["Who is this? This was my grandad's number.",
+     "I'll only talk to you if you can quote Sam Fiszman's words. He was Grandad's old friend.",
+     "If you really know Bondi, you'll know where to find them."],
+    "That's not Sam's words.",
+    "Still not Sam. His words are in the park that bears his name.",
     "Grandad always said words matter. Yours don't mean anything to me.",
-    "Still don't know you, mate."
-  ],
+    "Still don't know you, mate."  ],
   accepted: [
     "…",
     "Sam's words. Grandad's favourite. Only the people he trusted ever knew them.",
@@ -719,7 +720,7 @@ async function sendMsg(){
     } else {
       const line = PADDY.wrong[Math.min(state.wrongCount, PADDY.wrong.length-1)];
       state.wrongCount++; save();
-      await paddySays([line]);
+      await paddySays(Array.isArray(line) ? line : [line]);
     }
   } else if(state.stage==="motto"){
     // Question 1: RAF motto. A right answer always wins, even with a "?".
