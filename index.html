@@ -394,17 +394,17 @@ const SEED_THREADS = {
    ===================================================================== */
 const PADDY = {
   // 1) First contact: Patrick wants to know who is texting from his late grandad's phone
-  intro: ["Who are you? Why have you got my grandad's phone?"],
-  // 2) Players explain themselves (council, document, notebook…)
+  intro: ["What do you want?"],
+  // 2) Players say what they're after: the Bondi contract (document, 1917 sale, O'Brien land…)
   introAccepted: [
     "I can't believe this is coming up again, after all this time.",
     "Fine. If you want that document, you'll have to earn it, and show me you know Bondi like the back of your hand.",
     "Start by telling me Sam Fiszman's words. He was an old friend of my grandad's."
   ],
   introVague: [
-    "That doesn't answer my question. Who are you, and what do you want?",
-    "I'm not talking to anyone who won't tell me why they've got Grandad's phone.",
-    "Last time: who are you, and what are you looking for?"
+    "That's not an answer. What are you after?",
+    "I'm not talking to anyone who won't tell me what they're looking for.",
+    "Last time: what are you looking for?"
   ],
   // 3) Sam Fiszman's words
   wrong: [
@@ -413,7 +413,7 @@ const PADDY = {
     "Grandad always said words matter. Yours don't mean anything to me.",
     "Still don't know you, mate."
   ],
-  explainHint: ["Just tell me straight: who sent you, and what are you after?", "The council? Grandad's notebook? Something else?"],
+  explainHint: ["You're texting a dead man's phone. You must be looking for something.", "Something Grandad kept? Some old paper?"],
   locationHint: ["Tap the green button to share your location. I need to know you're coming."],
   quoteHint: ["You don't know where to find them? His words are in the park that bears his name."],
   accepted: [
@@ -491,7 +491,7 @@ let state = {unlocked:false, stage:"intro", introTries:0, log:[], startedAt:null
 // stages: intro (who are you?) -> explain -> quote -> motto (RAF motto) -> club (oldest surf club, 1906) -> location
 //         -> travelling (Frangipani Girl) -> verify (Homestead site) -> done
 // Session report: 1 penalty point per hint asked and per wrong answer (see the hidden report screen)
-const STEP = {passcode:"Phone passcode", explain:"Who are you?", quote:"Sam's words", motto:"RAF motto", club:"Oldest surf club",
+const STEP = {passcode:"Phone passcode", explain:"What do you want?", quote:"Sam's words", motto:"RAF motto", club:"Oldest surf club",
   location:"Share location", travelling:"Frangipani Girl", verify:"The Homestead"};
 function penalize(kind, detail, step){
   (state.log = state.log || []).push({k:kind, s:step||state.stage, d:(detail||"").slice(0,60), t:Date.now()}); save();
@@ -880,11 +880,11 @@ function isHelp(text){
   return text.includes("?") || CONFIG.HELP_WORDS.some(w => t.includes(" " + w));
 }
 /* ---------- did the players explain who they are / what they want? ---------- */
-// Lenient on purpose: any message mentioning the council, the document, the notebook, Adam, the
-// phone or a search counts. After 3 vague answers Patrick moves on anyway (no dead end).
-const EXPLAIN_WORDS = ["council","document","doc","contract","paper","papers","notebook","note book","archive","archives",
-  "historian","history","eleanor","harlow","adam","benett","grandad","grandfather","grandpa","phone","found","find","looking",
-  "search","research","o brien","obrien","secret","1917","land","beach","work","we are","we re","were from","i am","i m"];
+// Lenient on purpose: any message about looking for the Bondi contract (document, paper, 1917 sale,
+// O'Brien land, the beach, the archives, Adam's notebook…) counts. After 3 vague answers Patrick moves on anyway (no dead end).
+const EXPLAIN_WORDS = ["contract","contracts","document","documents","doc","paper","papers","deed","deeds","sale","sold","1917",
+  "o brien","obrien","brien","land","bondi beach","beach","archive","archives","council","notebook","note book","adam","benett",
+  "secret","hidden","hid","looking","find","search","searching","research","missing","lost","original","official","treasure"]
 function isExplanation(text){
   const t = " " + norm(text).replace(/\s+/g," ") + " ";
   return EXPLAIN_WORDS.some(w => t.includes(" " + w + " ") || t.includes(" " + w + "s ")) ;
