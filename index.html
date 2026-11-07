@@ -357,20 +357,31 @@ const SEED_THREADS = {
    SCRIPT — Paddy's lines
    ===================================================================== */
 const PADDY = {
+  // 1) First contact: Patrick wants to know who is texting from his late grandad's phone
+  intro: ["Who are you? Why have you got my grandad's phone?"],
+  // 2) Players explain themselves (council, document, notebook…)
+  introAccepted: [
+    "I can't believe this is coming up again, after all this time.",
+    "Fine. If you want that document, you'll have to earn it, and show me you know Bondi like the back of your hand.",
+    "Start by telling me Sam Fiszman's words. He was an old friend of my grandad's."
+  ],
+  introVague: [
+    "That doesn't answer my question. Who are you, and what do you want?",
+    "I'm not talking to anyone who won't tell me why they've got Grandad's phone.",
+    "Last time: who are you, and what are you looking for?"
+  ],
+  // 3) Sam Fiszman's words
   wrong: [
-    ["Who is this? This was my grandad's number.",
-     "I'll only talk to you if you can quote Sam Fiszman's words. He was Grandad's old friend.",
-     "If you really know Bondi, you'll know where to find them."],
     "That's not Sam's words.",
-    "Still not Sam. His words are in the park that bears his name.",
+    "Still not Sam.",
     "Grandad always said words matter. Yours don't mean anything to me.",
-    "Still don't know you, mate."  ],
+    "Still don't know you, mate."
+  ],
+  quoteHint: ["You don't know where to find them? His words are in the park that bears his name."],
   accepted: [
     "…",
     "Sam's words. Grandad's favourite. Only the people he trusted ever knew them.",
-    "So you've got his notebook. I think I know why you're writing to me.",
-    "I've been waiting for someone to come asking.",
-    "But quoting Sam is one thing. Let's see if you're really Bondi people.",
+    "Alright. But quoting Sam is one thing. Let's see if you're really Bondi people.",
     "My great-grandad flew with the boys in blue in the war. Grandad made me learn their motto before I could read.",
     "What's the motto of the Royal Air Force?"
   ],
@@ -440,8 +451,8 @@ const PADDY = {
 /* =====================================================================
    STATE (persisted so a page reload doesn't reset progress)
    ===================================================================== */
-let state = {unlocked:false, stage:"quote", paddy:[], extra:{}, wrongCount:0, qWrong:0, unread:0};
-// stages: quote -> motto (RAF motto) -> club (oldest surf club, 1906) -> location
+let state = {unlocked:false, stage:"intro", introTries:0, paddy:[], extra:{}, wrongCount:0, qWrong:0, unread:0};
+// stages: intro (who are you?) -> explain -> quote -> motto (RAF motto) -> club (oldest surf club, 1906) -> location
 //         -> travelling (Frangipani Girl) -> verify (Homestead site) -> done
 const walking = () => state.stage==="travelling" || state.stage==="verify";
 const currentTarget = () => state.stage==="verify"
@@ -733,14 +744,29 @@ async function sendMsg(){
   pushPaddy({t:"me", text});
   await sleep(600);
 
-  if(state.stage==="quote"){
+  if(state.stage==="intro"){
+    // any first message: Patrick asks who they are
+    if(matchesQuote(text)){ state.stage = "motto"; state.qWrong = 0; save(); await paddySays(PADDY.accepted); }
+    else { state.stage = "explain"; save(); await paddySays(PADDY.intro); }
+  } else if(state.stage==="explain"){
+    if(matchesQuote(text)){ state.stage = "motto"; state.qWrong = 0; save(); await paddySays(PADDY.accepted); }
+    else if(isExplanation(text) || state.introTries >= 3){
+      state.stage = "quote"; save(); await paddySays(PADDY.introAccepted);
+    } else {
+      const line = PADDY.introVague[Math.min(state.introTries, PADDY.introVague.length-1)];
+      state.introTries++; save(); await paddySays([line]);
+    }
+  } else if(state.stage==="quote"){
     if(matchesQuote(text)){
       state.stage = "motto"; state.qWrong = 0; save();
       await paddySays(PADDY.accepted);
     } else {
-      const line = PADDY.wrong[Math.min(state.wrongCount, PADDY.wrong.length-1)];
-      state.wrongCount++; save();
-      await paddySays(Array.isArray(line) ? line : [line]);
+      if(isHintRequest(text)){ await paddySays(PADDY.quoteHint); }
+      else {
+        const line = PADDY.wrong[Math.min(state.wrongCount, PADDY.wrong.length-1)];
+        state.wrongCount++; save();
+        await paddySays(state.wrongCount===2 ? [line, ...PADDY.quoteHint] : [line]);
+      }
     }
   } else if(state.stage==="motto"){
     // Question 1: RAF motto. A right answer always wins, even with a "?".
@@ -785,6 +811,16 @@ async function sendMsg(){
 function isHelp(text){
   const t = " " + norm(text).replace(/\s+/g," ") + " ";
   return text.includes("?") || CONFIG.HELP_WORDS.some(w => t.includes(" " + w));
+}
+/* ---------- did the players explain who they are / what they want? ---------- */
+// Lenient on purpose: any message mentioning the council, the document, the notebook, Adam, the
+// phone or a search counts. After 3 vague answers Patrick moves on anyway (no dead end).
+const EXPLAIN_WORDS = ["council","document","doc","contract","paper","papers","notebook","note book","archive","archives",
+  "historian","history","eleanor","harlow","adam","benett","grandad","grandfather","grandpa","phone","found","find","looking",
+  "search","research","o brien","obrien","secret","1917","land","beach","help","lost","work","we are","we re","were from","i am","i m"];
+function isExplanation(text){
+  const t = " " + norm(text).replace(/\s+/g," ") + " ";
+  return EXPLAIN_WORDS.some(w => t.includes(" " + w + " ") || t.includes(" " + w + "s ")) ;
 }
 /* ---------- hint requests during Paddy's two questions ---------- */
 function isHintRequest(text){
