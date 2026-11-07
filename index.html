@@ -172,9 +172,13 @@ button{font-family:inherit}
 #gpsbar button{margin-left:auto;border:1px solid #2b4c80;border-radius:6px;padding:4px 8px;color:#fff;font-size:12px;font-weight:bold;cursor:pointer;background:linear-gradient(#8fb2e8,#2f5fb3)}
 
 /* ================== DEBUG ================== */
-#debug{position:fixed;bottom:8px;left:8px;z-index:99;display:none;gap:6px;flex-wrap:wrap;max-width:360px}
-#debug button{font-size:12px;padding:6px 8px;border-radius:6px;border:none;background:#ffcc00;cursor:pointer}
-#debug .info{font-size:11px;color:#fff;background:rgba(0,0,0,.7);padding:4px 6px;border-radius:6px;width:100%}
+#debugToggle{position:fixed;top:calc(env(safe-area-inset-top) + 26px);right:6px;z-index:100;display:none;width:34px;height:34px;border-radius:50%;
+  border:2px solid #fff;background:#ffcc00;font-size:17px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+#debug{position:fixed;top:calc(env(safe-area-inset-top) + 66px);right:6px;left:6px;z-index:99;display:none;gap:6px;flex-wrap:wrap;
+  padding:8px;border-radius:10px;background:rgba(0,0,0,.85);box-shadow:0 6px 20px rgba(0,0,0,.6)}
+#debug.open{display:flex}
+#debug button{font-size:13px;padding:8px 10px;border-radius:6px;border:none;background:#ffcc00;cursor:pointer}
+#debug .info{font-size:11px;color:#fff;padding:2px 2px 4px;width:100%}
 </style>
 </head>
 <body>
@@ -250,6 +254,7 @@ button{font-family:inherit}
   <div id="homebar"><i></i></div>
 </div>
 
+<button id="debugToggle" aria-label="Test tools">🛠</button>
 <div id="debug"></div>
 
 <script>
@@ -905,7 +910,8 @@ async function arrive(){
 const DEBUG = new URLSearchParams(location.search).has("debug");
 function debugInfo(t){ if(DEBUG){ const i=document.querySelector("#debug .info"); if(i) i.textContent=t; } }
 if(DEBUG){
-  const dbg = $("debug"); dbg.style.display="flex";
+  const dbg = $("debug"), tg = $("debugToggle"); tg.style.display="block";
+  tg.onclick = ()=>dbg.classList.toggle("open");
   dbg.innerHTML = `<div class="info">debug mode · stage: ${state.stage}</div>`;
   [["Reset game",()=>{ try{localStorage.removeItem(CONFIG.STORAGE_KEY);}catch(e){} location.reload(); }],
    ["Skip lock",()=>{ state.unlocked=true; save(); resetNav(); }],
@@ -919,7 +925,8 @@ if(DEBUG){
       checkPosition({coords:{latitude:pt.lat + m/111320, longitude:pt.lng, accuracy:8}});
    }]),
    ["Stage info",()=>debugInfo("stage: "+state.stage + (lastFix? ` · last fix ±${Math.round(lastFix.coords.accuracy)} m`:""))]
-  ].forEach(([label,fn])=>{ const b=document.createElement("button"); b.textContent=label; b.onclick=fn; dbg.appendChild(b); });
+  ].forEach(([label,fn])=>{ const b=document.createElement("button"); b.textContent=label;
+    b.onclick=()=>{ fn(); if(label!=="Stage info" && !label.startsWith("Fake")) dbg.classList.remove("open"); }; dbg.appendChild(b); });
 }
 
 /* ================== BOOT ================== */
