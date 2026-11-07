@@ -50,6 +50,8 @@ button{font-family:inherit}
   color:#6a6a6a;font-size:26px;display:flex;align-items:center;justify-content:center;cursor:grab;z-index:2;box-shadow:0 1px 2px rgba(0,0,0,.6)}
 .passpanel{position:absolute;inset:0;z-index:5;display:none;flex-direction:column;background:linear-gradient(#5b6f8a,#2c3e57 30%,#1a283c)}
 .passpanel.show{display:flex}
+.pp-sub{color:#fff;font-size:15px;text-align:center;margin:-6px 0 12px;min-height:18px;opacity:.9}
+#pad.locked button{opacity:.35;pointer-events:none}
 .pp-title{color:#fff;font-size:18px;font-weight:bold;text-align:center;margin:26px 0 14px;text-shadow:0 -1px 0 rgba(0,0,0,.6)}
 #dots{display:flex;gap:10px;justify-content:center;margin-bottom:auto}
 #dots span{width:52px;height:52px;border-radius:6px;background:#fff;box-shadow:inset 0 2px 3px rgba(0,0,0,.4);position:relative}
@@ -105,6 +107,17 @@ button{font-family:inherit}
 .search{display:flex;align-items:center;gap:6px;padding:7px 8px;background:linear-gradient(#cdd5df,#a6b4c5);border-bottom:1px solid #8a97a8;color:#8a8a8a;flex-shrink:0}
 .search input{flex:1;border:1px solid #8e9aa9;border-radius:15px;background:#fff;font-size:15px;padding:5px 12px;outline:none;font-family:inherit;color:var(--ink)}
 .list{flex:1;overflow-y:auto;background:#fff;padding-bottom:var(--home-gap)}
+.st-list{background:repeating-linear-gradient(90deg,#c5ccd4 0 5px,#cbd2d8 5px 8px);padding:10px 10px var(--home-gap)}
+.st-group{background:#fff;border:1px solid #a6a6a6;border-radius:9px;overflow:hidden;margin-bottom:16px}
+.st-row{display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid #d9d9d9;font-size:17px;font-weight:bold;cursor:default}
+.st-row:last-child{border-bottom:none}
+.st-row .st-ico{width:29px;height:29px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;box-shadow:0 1px 2px rgba(0,0,0,.3)}
+.st-row .st-val{margin-left:auto;font-weight:normal;color:#385487;font-size:16px}
+.st-row .st-chev{color:#8a8a8a;font-weight:normal;margin-left:6px}
+.st-row.tap{cursor:pointer} .st-row.tap:active{background:linear-gradient(#058cf5,#015fe6);color:#fff}
+.st-sw{margin-left:auto;width:94px;height:27px;border-radius:5px;border:1px solid #9a9a9a;background:linear-gradient(#eee,#fff);font-size:14px;color:#666;display:flex;align-items:center;justify-content:flex-end;padding-right:12px;position:relative}
+.st-sw::before{content:"";position:absolute;left:0;top:0;bottom:0;width:44px;border-radius:5px;background:linear-gradient(#fdfdfd,#cfcfcf);border-right:1px solid #9a9a9a}
+.st-foot{text-align:center;color:#4c566c;font-size:13px;margin:-6px 0 14px;text-shadow:0 1px 0 rgba(255,255,255,.6)}
 .section{padding:2px 12px;font-size:16px;font-weight:bold;color:#fff;background:linear-gradient(#a5b1ba,#8c9ba7);text-shadow:0 1px 0 rgba(0,0,0,.25)}
 .crow{padding:12px 12px;border-bottom:1px solid var(--line);font-size:20px;cursor:pointer}
 .crow b{font-weight:bold}
@@ -207,7 +220,8 @@ button{font-family:inherit}
       <div class="slider" id="slider"><div class="knob" id="knob">&#10140;</div><span class="slide-text">slide to unlock</span></div>
     </div>
     <div class="passpanel" id="passpanel">
-      <div class="pp-title">Enter Passcode</div>
+      <div class="pp-title" id="ppTitle">Enter Passcode</div>
+      <div class="pp-sub" id="ppSub"></div>
       <div id="dots"><span></span><span></span><span></span><span></span></div>
       <div id="pad"></div>
     </div>
@@ -237,6 +251,12 @@ button{font-family:inherit}
         <button class="act off"><span>&#128222;</span>Call</button>
       </div>
     </div>
+  </section>
+
+  <!-- SETTINGS (decoy; "Report" at the bottom opens the organiser's session report) -->
+  <section id="settings" class="screen">
+    <div class="navbar"><button class="link back-btn">Home</button><h1>Settings</h1></div>
+    <div class="list st-list" id="settingsList"></div>
   </section>
 
   <!-- MESSAGES (thread list) -->
@@ -275,6 +295,8 @@ button{font-family:inherit}
    ===================================================================== */
 const CONFIG = {
   PASSCODE: "7752",
+  MAX_CODE_TRIES: 3,          // wrong codes in a row before the phone locks
+  LOCKOUT_MS: 2*60*1000,      // lock duration (2 minutes)
 
   // Sam Fiszman's words, as on the plaque in Sam Fiszman Park.
   // Matching ignores case, punctuation and "I'm"/"I am", accepts extra words
@@ -469,10 +491,10 @@ let state = {unlocked:false, stage:"intro", introTries:0, log:[], startedAt:null
 // stages: intro (who are you?) -> explain -> quote -> motto (RAF motto) -> club (oldest surf club, 1906) -> location
 //         -> travelling (Frangipani Girl) -> verify (Homestead site) -> done
 // Session report: 1 penalty point per hint asked and per wrong answer (see the hidden report screen)
-const STEP = {explain:"Who are you?", quote:"Sam's words", motto:"RAF motto", club:"Oldest surf club",
+const STEP = {passcode:"Phone passcode", explain:"Who are you?", quote:"Sam's words", motto:"RAF motto", club:"Oldest surf club",
   location:"Share location", travelling:"Frangipani Girl", verify:"The Homestead"};
-function penalize(kind, detail){
-  (state.log = state.log || []).push({k:kind, s:state.stage, d:(detail||"").slice(0,60), t:Date.now()}); save();
+function penalize(kind, detail, step){
+  (state.log = state.log || []).push({k:kind, s:step||state.stage, d:(detail||"").slice(0,60), t:Date.now()}); save();
 }
 const walking = () => state.stage==="travelling" || state.stage==="verify";
 const currentTarget = () => state.stage==="verify"
@@ -527,13 +549,35 @@ let entry = "";
   knob.addEventListener("pointerup", end); knob.addEventListener("pointercancel", end);
 })();
 function renderDots(){ [...$("dots").children].forEach((s,i)=>s.classList.toggle("on", i<entry.length)); }
+// ---- 3 wrong codes in a row -> phone disabled for 2 minutes (persisted, survives a reload)
+function lockLeft(){ return Math.max(0, (state.lockUntil||0) - Date.now()); }
+function renderLock(){
+  const left = lockLeft();
+  $("pad").classList.toggle("locked", left>0);
+  if(left>0){
+    const tot = Math.ceil(left/1000), m = Math.floor(tot/60), sec = String(tot%60).padStart(2,"0");
+    $("ppTitle").textContent = "iPhone is disabled";
+    $("ppSub").textContent = "try again in " + m + ":" + sec;
+  } else {
+    $("ppTitle").textContent = "Enter Passcode";
+    const t = state.codeFails||0;
+    $("ppSub").textContent = t ? (t + " Failed Passcode Attempt" + (t>1?"s":"")) : "";
+  }
+}
+setInterval(()=>{ if(current==="lock") renderLock(); }, 500);
 function press(k){
+  if(lockLeft()>0) return;
   if(entry.length>=4) return;
   entry += k; renderDots();
   if(entry.length===4){
     setTimeout(()=>{
-      if(entry===CONFIG.PASSCODE){ state.unlocked=true; if(!state.startedAt) state.startedAt=Date.now(); save(); resetNav(); }
-      else { $("dots").classList.add("shake"); if(navigator.vibrate) navigator.vibrate(200);
+      if(!state.startedAt){ state.startedAt = Date.now(); save(); }   // the clock starts at the first passcode attempt
+      if(entry!==CONFIG.PASSCODE) penalize("wrong", entry, "passcode");
+      if(entry===CONFIG.PASSCODE){ state.unlocked=true; state.codeFails=0; state.lockUntil=0; save(); resetNav(); }
+      else { state.codeFails = (state.codeFails||0) + 1;
+             if(state.codeFails >= CONFIG.MAX_CODE_TRIES){ state.codeFails = 0; state.lockUntil = Date.now() + CONFIG.LOCKOUT_MS; }
+             save(); renderLock();
+             $("dots").classList.add("shake"); if(navigator.vibrate) navigator.vibrate(200);
              setTimeout(()=>{ $("dots").classList.remove("shake"); entry=""; renderDots(); },400); }
     },150);
   }
@@ -552,7 +596,7 @@ const APPS = [
   {name:"Clock",      icon:"🕰️", bg:"linear-gradient(#444,#000)"},
   {name:"Calculator", icon:"🔢", bg:"linear-gradient(#ffb74d,#e65100)"},
   {name:"Notes",      icon:"📝", bg:"linear-gradient(#fff6c2,#f2c94c)"},
-  {name:"Settings",   icon:"⚙️", bg:"linear-gradient(#c8c8c8,#7d7d7d)"}
+  {name:"Settings",   icon:"⚙️", bg:"linear-gradient(#c8c8c8,#7d7d7d)", open:()=>go("settings")}
 ];
 const DOCK = [
   {name:"Phone",  icon:"📞", bg:"linear-gradient(#a6e86c,#3fa313)", open:()=>go("contacts")},
@@ -661,12 +705,13 @@ $("chatAvatar").onclick = $("chatWho").onclick = ()=>{ if(chatWith) go("card", c
    screen. The browser / Android back button is wired to the same stack. */
 let stack = [];
 let histOK = true, ignorePop = 0;
-const BACK_LABEL = {home:"Home", contacts:"All Contacts", messages:"Messages", card:"Info", chat:"Back"};
+const BACK_LABEL = {settings:"Settings", home:"Home", contacts:"All Contacts", messages:"Messages", card:"Info", chat:"Back"};
 function render(e, fresh){
   if(e.name==="home") goHome();
   else if(e.name==="contacts") openContacts(fresh);
   else if(e.name==="card") openCard(e.arg);
   else if(e.name==="messages") openMessages();
+  else if(e.name==="settings") openSettings();
   else if(e.name==="chat") openChat(e.arg);
   const prev = stack[stack.length-2];
   document.querySelectorAll(".back-btn").forEach(b=>{ b.textContent = (prev ? BACK_LABEL[prev.name] : "Home"); });
@@ -965,7 +1010,7 @@ async function arrive(){
 }
 
 /* ================== SESSION REPORT (organiser) ==================
-   Tap the clock in the status bar 5 times quickly (or use the 🛠 test tools) to open it.
+   Open it from Settings > Report (bottom of the list), or from the 🛠 test tools.
    1 penalty point per hint asked and per wrong answer. */
 function fmtDur(ms){ const m=Math.round(ms/60000); return Math.floor(m/60)+"h"+String(m%60).padStart(2,"0"); }
 function showReport(){
@@ -982,9 +1027,27 @@ function showReport(){
   $("report").classList.add("show");
 }
 $("rpClose").onclick = ()=>$("report").classList.remove("show");
-(function(){ let taps=[]; $("sbTime").addEventListener("click", ()=>{
-  const now=Date.now(); taps=taps.filter(x=>now-x<2500); taps.push(now);
-  if(taps.length>=5){ taps=[]; showReport(); } }); })();
+function openSettings(){
+  const row = (ico, bg, label, val, sw) => `<div class="st-row"><span class="st-ico" style="background:${bg}">${ico}</span>${label}${
+    sw ? `<span class="st-sw">OFF</span>` : `<span class="st-val">${val||""}</span><span class="st-chev">&rsaquo;</span>`}</div>`;
+  $("settingsList").innerHTML =
+    `<div class="st-group">${row("✈️","linear-gradient(#ffb74d,#e65100)","Airplane Mode","",true)}
+       ${row("📶","linear-gradient(#7fbaf5,#1f5fbf)","Wi-Fi","Not Connected")}</div>
+     <div class="st-group">${row("📊","linear-gradient(#c8c8c8,#7d7d7d)","Usage")}
+       ${row("🔔","linear-gradient(#ff8a80,#c4120b)","Sounds")}
+       ${row("☀️","linear-gradient(#7fbaf5,#1f5fbf)","Brightness")}
+       ${row("🌅","linear-gradient(#a6e86c,#3fa313)","Wallpaper")}</div>
+     <div class="st-group">${row("⚙️","linear-gradient(#c8c8c8,#7d7d7d)","General")}
+       ${row("✉️","linear-gradient(#9fd0ff,#2b7be0)","Mail")}
+       ${row("📞","linear-gradient(#a6e86c,#3fa313)","Phone")}
+       ${row("🧭","linear-gradient(#cfe8ff,#4a90e2)","Safari")}
+       ${row("🎵","linear-gradient(#ffa64d,#e65c00)","iPod")}
+       ${row("🌻","linear-gradient(#7ec0ff,#2f6fd1)","Photos")}</div>
+     <div class="st-group"><div class="st-row tap" id="stReport"><span class="st-ico" style="background:linear-gradient(#555,#111)">📋</span>Report<span class="st-chev" style="margin-left:auto">&rsaquo;</span></div></div>
+     <div class="st-foot">iPhone &middot; Version 1.1.4</div>`;
+  $("stReport").onclick = showReport;
+  show("settings");
+}
 
 /* ================== DEBUG MODE (add ?debug=1 to the URL) ================== */
 const DEBUG = new URLSearchParams(location.search).has("debug");
