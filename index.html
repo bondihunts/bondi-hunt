@@ -172,6 +172,16 @@ button{font-family:inherit}
 #gpsbar button{margin-left:auto;border:1px solid #2b4c80;border-radius:6px;padding:4px 8px;color:#fff;font-size:12px;font-weight:bold;cursor:pointer;background:linear-gradient(#8fb2e8,#2f5fb3)}
 
 /* ================== DEBUG ================== */
+#report{position:fixed;inset:0;z-index:120;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);padding:16px}
+#report.show{display:flex}
+#report .rp-card{background:#fff;border-radius:12px;padding:16px;width:100%;max-width:360px;max-height:85vh;overflow:auto;font-size:14px;color:#111}
+#report .rp-title{font-size:18px;font-weight:bold;margin-bottom:8px}
+#report .rp-big{display:flex;gap:8px;margin:8px 0 12px}
+#report .rp-big div{flex:1;background:#f1f3f6;border-radius:8px;padding:8px;text-align:center}
+#report .rp-big b{display:block;font-size:22px}
+#report table{width:100%;border-collapse:collapse;font-size:13px}
+#report td{padding:4px 2px;border-bottom:1px solid #eee;vertical-align:top}
+#report button{margin-top:12px;width:100%;padding:10px;border:none;border-radius:8px;background:#2a5ea8;color:#fff;font-size:15px;font-weight:bold}
 #debugToggle{position:fixed;top:calc(env(safe-area-inset-top) + 26px);right:6px;z-index:100;display:none;width:34px;height:34px;border-radius:50%;
   border:2px solid #fff;background:#ffcc00;font-size:17px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.5)}
 #debug{position:fixed;top:calc(env(safe-area-inset-top) + 66px);right:6px;left:6px;z-index:99;display:none;gap:6px;flex-wrap:wrap;
@@ -255,6 +265,8 @@ button{font-family:inherit}
 </div>
 
 <button id="debugToggle" aria-label="Test tools">🛠</button>
+<div id="report"><div class="rp-card"><div class="rp-title">Session report</div><div id="rpBody"></div>
+  <button id="rpClose">Close</button></div></div>
 <div id="debug"></div>
 
 <script>
@@ -282,7 +294,8 @@ const CONFIG = {
 
   // Words that count as asking Paddy for a hint during the two questions
   // ("?" alone also counts, unless the message already contains the right answer)
-  HINT_WORDS: ["help","hint","clue","forgot","forget","remember","memory","dont know","don t know","no idea","idk","which","where","cant","can t","not sure"],
+  HINT_WORDS: ["help","hint","clue","forgot","forget","remember","memory","dont know","don t know","no idea","idk","which","where","cant","can t","not sure",
+    "understand","dont get","don t get","confused","stuck","lost","what do you mean","huh","explain"],
 
   // Meeting point: the Frangipani Girl mural on the Bondi sea wall (promenade).
   // 33°53'29.9"S 151°16'31.1"E (measured on site)
@@ -296,7 +309,8 @@ const CONFIG = {
   CHECK_RADIUS_M: 50,
 
   // Messages that count as asking Paddy for help while looking for the mural
-  HELP_WORDS: ["help","where","find","lost","photo","picture","pic","show","hint","cant","can t","clue"],
+  HELP_WORDS: ["help","where","find","lost","photo","picture","pic","show","hint","cant","can t","clue",
+    "understand","dont get","don t get","confused","stuck","no idea","dont know","don t know","what do you mean","explain"],
 
   // Link sent on arrival (next stage of the adventure)
   NEXT_LINK: "https://example.com/next-stage",
@@ -377,6 +391,8 @@ const PADDY = {
     "Grandad always said words matter. Yours don't mean anything to me.",
     "Still don't know you, mate."
   ],
+  explainHint: ["Just tell me straight: who sent you, and what are you after?", "The council? Grandad's notebook? Something else?"],
+  locationHint: ["Tap the green button to share your location. I need to know you're coming."],
   quoteHint: ["You don't know where to find them? His words are in the park that bears his name."],
   accepted: [
     "OK, that's a first step.",
@@ -449,9 +465,15 @@ const PADDY = {
 /* =====================================================================
    STATE (persisted so a page reload doesn't reset progress)
    ===================================================================== */
-let state = {unlocked:false, stage:"intro", introTries:0, paddy:[], extra:{}, wrongCount:0, qWrong:0, unread:0};
+let state = {unlocked:false, stage:"intro", introTries:0, log:[], startedAt:null, finishedAt:null, paddy:[], extra:{}, wrongCount:0, qWrong:0, unread:0};
 // stages: intro (who are you?) -> explain -> quote -> motto (RAF motto) -> club (oldest surf club, 1906) -> location
 //         -> travelling (Frangipani Girl) -> verify (Homestead site) -> done
+// Session report: 1 penalty point per hint asked and per wrong answer (see the hidden report screen)
+const STEP = {explain:"Who are you?", quote:"Sam's words", motto:"RAF motto", club:"Oldest surf club",
+  location:"Share location", travelling:"Frangipani Girl", verify:"The Homestead"};
+function penalize(kind, detail){
+  (state.log = state.log || []).push({k:kind, s:state.stage, d:(detail||"").slice(0,60), t:Date.now()}); save();
+}
 const walking = () => state.stage==="travelling" || state.stage==="verify";
 const currentTarget = () => state.stage==="verify"
   ? {pt:CONFIG.CHECK, r:CONFIG.CHECK_RADIUS_M} : {pt:CONFIG.TARGET, r:CONFIG.RADIUS_M};
@@ -510,7 +532,7 @@ function press(k){
   entry += k; renderDots();
   if(entry.length===4){
     setTimeout(()=>{
-      if(entry===CONFIG.PASSCODE){ state.unlocked=true; save(); resetNav(); }
+      if(entry===CONFIG.PASSCODE){ state.unlocked=true; if(!state.startedAt) state.startedAt=Date.now(); save(); resetNav(); }
       else { $("dots").classList.add("shake"); if(navigator.vibrate) navigator.vibrate(200);
              setTimeout(()=>{ $("dots").classList.remove("shake"); entry=""; renderDots(); },400); }
     },150);
@@ -750,6 +772,8 @@ async function sendMsg(){
     if(matchesQuote(text)){ state.stage = "motto"; state.qWrong = 0; save(); await paddySays(PADDY.accepted); }
     else if(isExplanation(text) || state.introTries >= 3){
       state.stage = "quote"; save(); await paddySays(PADDY.introAccepted);
+    } else if(isHintRequest(text)){
+      await paddySays(PADDY.explainHint);   // not a puzzle: no penalty
     } else {
       const line = PADDY.introVague[Math.min(state.introTries, PADDY.introVague.length-1)];
       state.introTries++; save(); await paddySays([line]);
@@ -759,10 +783,10 @@ async function sendMsg(){
       state.stage = "motto"; state.qWrong = 0; save();
       await paddySays(PADDY.accepted);
     } else {
-      if(isHintRequest(text)){ await paddySays(PADDY.quoteHint); }
+      if(isHintRequest(text)){ penalize("hint", text); await paddySays(PADDY.quoteHint); }
       else {
         const line = PADDY.wrong[Math.min(state.wrongCount, PADDY.wrong.length-1)];
-        state.wrongCount++; save();
+        state.wrongCount++; penalize("wrong", text);
         await paddySays(state.wrongCount===2 ? [line, ...PADDY.quoteHint] : [line]);
       }
     }
@@ -772,10 +796,10 @@ async function sendMsg(){
       state.stage = "club"; state.qWrong = 0; save();
       await paddySays(PADDY.mottoOk);
     } else if(isHintRequest(text)){
-      await paddySays(PADDY.mottoHint);
+      penalize("hint", text); await paddySays(PADDY.mottoHint);
     } else {
       const line = PADDY.mottoWrong[Math.min(state.qWrong, PADDY.mottoWrong.length-1)];
-      state.qWrong++; save();
+      state.qWrong++; penalize("wrong", text);
       await paddySays([line]);
     }
   } else if(state.stage==="club"){
@@ -786,20 +810,20 @@ async function sendMsg(){
       await paddySays(PADDY.clubOk);
       updateStageUI();
     } else if(years.includes(CONFIG.CLUB_DECOY)){
-      await paddySays(PADDY.clubDecoy);
+      penalize("wrong", text); await paddySays(PADDY.clubDecoy);
     } else if(!years.length && isHintRequest(text)){
-      await paddySays(PADDY.clubHint);
+      penalize("hint", text); await paddySays(PADDY.clubHint);
     } else {
       const line = PADDY.clubWrong[Math.min(state.qWrong, PADDY.clubWrong.length-1)];
-      state.qWrong++; save();
+      state.qWrong++; penalize("wrong", text);
       await paddySays([line]);
     }
   } else if(state.stage==="location"){
-    await paddySays(["Share your location first."]);
+    await paddySays(isHintRequest(text) ? PADDY.locationHint : ["Share your location first."]);
   } else if(state.stage==="travelling"){
-    await paddySays(isHelp(text) ? PADDY.help : [PADDY.travelling]);
+    if(isHelp(text)){ penalize("hint", text); await paddySays(PADDY.help); } else await paddySays([PADDY.travelling]);
   } else if(state.stage==="verify"){
-    await paddySays(isHelp(text) ? PADDY.checkHelp : [PADDY.checkTravelling]);
+    if(isHelp(text)){ penalize("hint", text); await paddySays(PADDY.checkHelp); } else await paddySays([PADDY.checkTravelling]);
   } else {
     await paddySays([PADDY.afterEnd]);
   }
@@ -815,7 +839,7 @@ function isHelp(text){
 // phone or a search counts. After 3 vague answers Patrick moves on anyway (no dead end).
 const EXPLAIN_WORDS = ["council","document","doc","contract","paper","papers","notebook","note book","archive","archives",
   "historian","history","eleanor","harlow","adam","benett","grandad","grandfather","grandpa","phone","found","find","looking",
-  "search","research","o brien","obrien","secret","1917","land","beach","help","lost","work","we are","we re","were from","i am","i m"];
+  "search","research","o brien","obrien","secret","1917","land","beach","work","we are","we re","were from","i am","i m"];
 function isExplanation(text){
   const t = " " + norm(text).replace(/\s+/g," ") + " ";
   return EXPLAIN_WORDS.some(w => t.includes(" " + w + " ") || t.includes(" " + w + "s ")) ;
@@ -933,12 +957,34 @@ async function arrive(){
     state.stage = "verify"; save();
     await paddySays(PADDY.arrived);
   } else {
-    state.stage = "done"; save(); stopWatch(); updateStageUI();
+    state.stage = "done"; state.finishedAt = Date.now(); save(); stopWatch(); updateStageUI();
     await paddySays([...PADDY.verified, {text:"🔗 " + CONFIG.NEXT_LINK_LABEL, link:CONFIG.NEXT_LINK}]);
   }
   if(navigator.vibrate) navigator.vibrate([200,100,200]);
   arriving = false;
 }
+
+/* ================== SESSION REPORT (organiser) ==================
+   Tap the clock in the status bar 5 times quickly (or use the 🛠 test tools) to open it.
+   1 penalty point per hint asked and per wrong answer. */
+function fmtDur(ms){ const m=Math.round(ms/60000); return Math.floor(m/60)+"h"+String(m%60).padStart(2,"0"); }
+function showReport(){
+  const log = state.log || [];
+  const hints = log.filter(e=>e.k==="hint").length, wrong = log.filter(e=>e.k==="wrong").length;
+  const t = x => new Date(x).toLocaleTimeString("en-AU",{hour:"2-digit",minute:"2-digit"});
+  const dur = state.startedAt ? fmtDur((state.finishedAt||Date.now()) - state.startedAt) : "—";
+  const durLbl = state.finishedAt ? "total time" : "time so far";
+  const rows = log.map(e=>`<tr><td>${t(e.t)}</td><td>${STEP[e.s]||e.s}</td><td>${e.k==="hint"?"Hint":"Wrong answer"}</td><td>${(e.d||"").replace(/</g,"&lt;")}</td></tr>`).join("");
+  $("rpBody").innerHTML =
+    `<div>Started: ${state.startedAt?t(state.startedAt):"—"} · Finished: ${state.finishedAt?t(state.finishedAt):"—"}</div>
+     <div class="rp-big"><div><b>${dur}</b>${durLbl}</div><div><b>${hints}</b>hints</div><div><b>${wrong}</b>wrong</div><div><b>${hints+wrong}</b>penalty pts</div></div>
+     ${rows ? `<table>${rows}</table>` : "<div>No hints or wrong answers.</div>"}`;
+  $("report").classList.add("show");
+}
+$("rpClose").onclick = ()=>$("report").classList.remove("show");
+(function(){ let taps=[]; $("sbTime").addEventListener("click", ()=>{
+  const now=Date.now(); taps=taps.filter(x=>now-x<2500); taps.push(now);
+  if(taps.length>=5){ taps=[]; showReport(); } }); })();
 
 /* ================== DEBUG MODE (add ?debug=1 to the URL) ================== */
 const DEBUG = new URLSearchParams(location.search).has("debug");
@@ -958,6 +1004,7 @@ if(DEBUG){
       const {pt} = currentTarget();
       checkPosition({coords:{latitude:pt.lat + m/111320, longitude:pt.lng, accuracy:8}});
    }]),
+   ["Session report",()=>showReport()],
    ["Stage info",()=>debugInfo("stage: "+state.stage + (lastFix? ` · last fix ±${Math.round(lastFix.coords.accuracy)} m`:""))]
   ].forEach(([label,fn])=>{ const b=document.createElement("button"); b.textContent=label;
     b.onclick=()=>{ fn(); if(label!=="Stage info" && !label.startsWith("Fake")) dbg.classList.remove("open"); }; dbg.appendChild(b); });
