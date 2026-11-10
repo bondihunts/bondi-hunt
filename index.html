@@ -569,17 +569,16 @@ const PADDY = {
     "\"Put the A behind you and walk at " + CONFIG.BEARING_1 + "° until you reach the street named after a hall.\"",
     "\"Then turn to " + CONFIG.BEARING_2 + "° and look for the telephone that no longer rings.\"",
     "\"Among strangers' stories, one of them is mine.\"",
-    "He had a compass on that phone. Use it.",
-    "Keep the Icebergs year handy. You'll need it there."
+    "He had a compass on that phone. Use it."
   ],
   boxTravelling: "Grandad's directions: " + CONFIG.BEARING_1 + "° to the street named after a hall, then " + CONFIG.BEARING_2 + "° to the telephone that no longer rings.",
-  boxHelp: ["Open the compass on Grandad's phone and follow his numbers.", "The street is Hall Street. Look for an old phone booth, and what stands next to it.", "And you'll need the year you found at the Icebergs."],
+  boxHelp: ["Open the compass on Grandad's phone and follow his numbers.", "The street is Hall Street. Look for an old phone booth, and what stands next to it."],
   boxNotHereFar: "You're nowhere near. Use the compass: " + CONFIG.BEARING_1 + "°, then " + CONFIG.BEARING_2 + "°.",
   boxNotHereNear: "Close. Look for the telephone that no longer rings.",
   atBox: [
     "You found it.",
     "Grandad's book is in there. Locked, of course.",
-    "Remember the year you found at the Icebergs? That's the code.",
+    "He never could remember numbers. He wrote everything down in his notes.",
     "Whatever you find inside, think hard before you hand it to anyone."
   ],
   notHereFar: "You're nowhere near. Look at the photo again.",
@@ -1195,11 +1194,11 @@ $("vwNext").onclick = ()=>openViewer(vwIdx+1);
     if(dx<-40) openViewer(vwIdx+1); else if(dx>40) openViewer(vwIdx-1); x0=null; }); })();
 
 /* ================== NOTES ==================
-   The padlock code is 1929 (Bondi Icebergs Club founded, shown on its facade); Patrick sends players to the Icebergs from the Frangipani Girl.
+   Padlock code = Icebergs year (1929, asked by Patrick after the Frangipani Girl) - contract year (1917) = 12 -> 012 on a 3-wheel lock.
    (3 children: Eileen, Thomas, Rose · 8 arms of the starfish · 1917 -> 7 · 1906 -> 6) */
 const NOTES = [
   {d:"2008-03-12", t:"Shopping", b:"milk\nbread (the good one)\nbait for Sunday\nsnail pellets for Sheila's tomatoes\nbatteries for the radio"},
-  {d:"2008-03-10", t:"Lock", b:"Lock — in case I forget (I will)\n\nThe year the mad ones started swimming through winter.\nIt's on their wall, at the south end."},
+  {d:"2008-03-10", t:"Lock", b:"Lock — in case I forget (I will)\n\nThe year the Icebergs started, minus the year that paper was signed.\nFill the empty wheels with zeros."},
   {d:"2008-03-05", t:"Bowls", b:"Pennant Sat 1pm with Kev\nBev's number is in the phone\nDON'T let Kev skip again"},
   {d:"2008-03-03", t:"Books to return", b:"A History of Waverley (overdue!!)\nthe fishing one for Gary"},
   {d:"2008-02-28", t:"Last day speech", b:"Thank the girls at the front desk\nSeven years. Paperwork, mostly.\nDon't mention the strongroom."},
