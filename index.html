@@ -537,12 +537,14 @@ const PADDY = {
   arrived: [
     "There you are.",
     "You look like honest people.",
-    "But I've been fooled before. One more thing before I trust you.",
-    "If you really have my grandfather's notebook, you'll know where The Homestead stood. The O'Briens' house.",
-    "Go and stand there. I'll know when you do."
+    "But I've been fooled before. Two things before I trust you.",
+    "First, walk to the Bondi Icebergs Club, at the end of the beach. Find the year it was founded. It's on the front of the club.",
+    "Write it down. You'll need it later.",
+    "Then meet me where The Homestead stood. The O'Briens' house. If you really have my grandfather's notebook, you'll know where that is.",
+    "I'll know when you're there."
   ],
-  checkTravelling: "Where The Homestead stood. It's all in Adam's notebook.",
-  checkHelp: ["Read the old papers in the notebook. Grandad kept everything.", "The house is long gone. Something else stands there now."],
+  checkTravelling: "The Icebergs first: write down the year on the front of the club. Then meet me where The Homestead stood.",
+  checkHelp: ["The Icebergs is the club with the pool, at the south end of the beach. The year is on its front.", "For The Homestead: read the old papers in the notebook. The house is long gone. Something else stands there now."],
   checkNotHereFar: "Not even close. Read the notebook again.",
   checkNotHereNear: "Nearly. Where The Homestead stood, exactly.",
   // At the Homestead site: final message + link
@@ -553,17 +555,16 @@ const PADDY = {
     "\"Then turn to " + CONFIG.BEARING_2 + "° and look for the telephone that no longer rings.\"",
     "\"Among strangers' stories, one of them is mine.\"",
     "He had a compass on that phone. Use it.",
-    "One more thing. What he hid is locked, and the code is a year: the year the Bondi Icebergs Club was founded.",
-    "It's written on the front of the club, at the south end of the beach. You'll need it before you open anything."
+    "Keep the Icebergs year handy. You'll need it there."
   ],
   boxTravelling: "Grandad's directions: " + CONFIG.BEARING_1 + "° to the street named after a hall, then " + CONFIG.BEARING_2 + "° to the telephone that no longer rings.",
-  boxHelp: ["Open the compass on Grandad's phone and follow his numbers.", "The street is Hall Street. Look for an old phone booth, and what stands next to it.", "And don't forget the code: the year on the front of the Icebergs club."],
+  boxHelp: ["Open the compass on Grandad's phone and follow his numbers.", "The street is Hall Street. Look for an old phone booth, and what stands next to it.", "And you'll need the year you found at the Icebergs."],
   boxNotHereFar: "You're nowhere near. Use the compass: " + CONFIG.BEARING_1 + "°, then " + CONFIG.BEARING_2 + "°.",
   boxNotHereNear: "Close. Look for the telephone that no longer rings.",
   atBox: [
     "You found it.",
     "Grandad's book is in there. Locked, of course.",
-    "The code is the year the Icebergs started. I hope you wrote it down.",
+    "Remember the year you found at the Icebergs? That's the code.",
     "Whatever you find inside, think hard before you hand it to anyone."
   ],
   notHereFar: "You're nowhere near. Look at the photo again.",
@@ -1163,7 +1164,7 @@ $("vwNext").onclick = ()=>openViewer(vwIdx+1);
     if(dx<-40) openViewer(vwIdx+1); else if(dx>40) openViewer(vwIdx-1); x0=null; }); })();
 
 /* ================== NOTES ==================
-   The padlock code is 1929 (Bondi Icebergs Club founded, shown on its facade); Patrick tells players at the Astra.
+   The padlock code is 1929 (Bondi Icebergs Club founded, shown on its facade); Patrick sends players to the Icebergs from the Frangipani Girl.
    (3 children: Eileen, Thomas, Rose · 8 arms of the starfish · 1917 -> 7 · 1906 -> 6) */
 const NOTES = [
   {d:"2008-03-12", t:"Shopping", b:"milk\nbread (the good one)\nbait for Sunday\nsnail pellets for Sheila's tomatoes\nbatteries for the radio"},
