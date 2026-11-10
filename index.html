@@ -107,6 +107,41 @@ button{font-family:inherit}
 .search{display:flex;align-items:center;gap:6px;padding:7px 8px;background:linear-gradient(#cdd5df,#a6b4c5);border-bottom:1px solid #8a97a8;color:#8a8a8a;flex-shrink:0}
 .search input{flex:1;border:1px solid #8e9aa9;border-radius:15px;background:#fff;font-size:15px;padding:5px 12px;outline:none;font-family:inherit;color:var(--ink)}
 .list{flex:1;overflow-y:auto;background:#fff;padding-bottom:var(--home-gap)}
+/* Photos */
+.ph-list{background:#000;padding:2px 2px var(--home-gap)}
+.ph-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
+.ph-grid img{width:100%;aspect-ratio:1;object-fit:cover;display:block;cursor:pointer}
+.ph-count{color:#bbb;text-align:center;font-size:15px;padding:14px 0}
+#viewer{background:#000}
+.vw-bar{position:relative;height:44px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;
+  background:linear-gradient(rgba(70,70,70,.9),rgba(20,20,20,.9));border-bottom:1px solid #000;flex-shrink:0}
+.vw-stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.vw-stage img{max-width:100%;max-height:100%;object-fit:contain}
+.vw-nav{position:absolute;top:50%;margin-top:-28px;width:44px;height:56px;border:none;background:rgba(0,0,0,.35);color:#fff;font-size:34px;cursor:pointer}
+.vw-prev{left:0;border-radius:0 8px 8px 0} .vw-next{right:0;border-radius:8px 0 0 8px}
+.vw-date{color:#ccc;text-align:center;font-size:13px;padding:8px 0 calc(var(--home-gap) + 4px)}
+/* Notes (2007 yellow pad) */
+.nt-bar{background:linear-gradient(#c9a066,#9b7240 50%,#8a6233 51%,#9b7341)!important;border-bottom:1px solid #5d4120!important}
+.nt-list{background:repeating-linear-gradient(#fdf7c3 0 43px,#c9c39a 43px 44px);padding-bottom:var(--home-gap)}
+.nt-row{display:flex;justify-content:space-between;align-items:center;height:44px;padding:0 14px;font-family:"Marker Felt","Chalkboard SE","Comic Sans MS",cursive;font-size:19px;cursor:pointer;color:#2a2a2a}
+.nt-row span:last-child{font-size:13px;color:#7a6a3a;font-family:Helvetica,Arial,sans-serif}
+.nt-row:active{background:rgba(0,0,0,.08)}
+.nt-paper{flex:1;overflow:auto;padding:8px 16px var(--home-gap);background:repeating-linear-gradient(#fdf7c3 0 31px,#c9d6e8 31px 32px);background-attachment:local;
+  font-family:"Marker Felt","Chalkboard SE","Comic Sans MS",cursive;color:#2a2a2a}
+.nt-date{font-size:13px;color:#7a6a3a;text-align:right;height:32px;line-height:32px;font-family:Helvetica,Arial,sans-serif}
+.nt-text{white-space:pre-wrap;font-size:19px;line-height:32px}
+/* Compass */
+#compass .cp-body{flex:1;background:radial-gradient(circle at 50% 35%,#3a3a3a,#0d0d0d 70%);display:flex;flex-direction:column;align-items:center;padding:24px 16px var(--home-gap);color:#fff}
+.cp-dial-wrap{position:relative;width:260px;height:260px;margin-top:6px}
+.cp-lubber{position:absolute;left:50%;top:-12px;margin-left:-2px;width:4px;height:30px;background:#ff3b30;border-radius:2px;z-index:2}
+.cp-dial{width:260px;height:260px;border-radius:50%;transition:transform .15s linear;
+  background:radial-gradient(circle,#1c1c1c 0 54%,transparent 55%),repeating-conic-gradient(#fff 0 .6deg,transparent .6deg 5deg),#111;
+  border:3px solid #888;position:relative;box-shadow:0 0 0 2px #000,0 6px 20px rgba(0,0,0,.7)}
+.cp-dial span{position:absolute;left:50%;top:50%;font-weight:bold;font-size:22px;transform-origin:0 0}
+.cp-dial span.n{color:#ff3b30}
+.cp-dial i{position:absolute;left:50%;top:50%;font-style:normal;font-size:12px;color:#ccc;transform-origin:0 0}
+.cp-read{font-size:46px;font-weight:200;margin-top:22px;letter-spacing:1px}
+.cp-msg{font-size:14px;color:#bbb;text-align:center;min-height:20px;margin-top:6px;max-width:280px}
 .st-list{background:repeating-linear-gradient(90deg,#c5ccd4 0 5px,#cbd2d8 5px 8px);padding:10px 10px var(--home-gap)}
 .st-group{background:#fff;border:1px solid #a6a6a6;border-radius:9px;overflow:hidden;margin-bottom:16px}
 .st-row{display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid #d9d9d9;font-size:17px;font-weight:bold;cursor:default}
@@ -253,6 +288,38 @@ button{font-family:inherit}
     </div>
   </section>
 
+  <!-- PHOTOS: Adam's camera roll (the last photo is the Frangipani Girl) -->
+  <section id="photos" class="screen">
+    <div class="navbar"><button class="link back-btn">Home</button><h1>Camera Roll</h1></div>
+    <div class="list ph-list"><div class="ph-grid" id="phGrid"></div><div class="ph-count" id="phCount"></div></div>
+  </section>
+  <section id="viewer" class="screen">
+    <div class="vw-bar"><button class="link back-btn">Camera Roll</button><span id="vwTitle"></span></div>
+    <div class="vw-stage" id="vwStage"><img id="vwImg" alt=""><button class="vw-nav vw-prev" id="vwPrev">&lsaquo;</button><button class="vw-nav vw-next" id="vwNext">&rsaquo;</button></div>
+    <div class="vw-date" id="vwDate"></div>
+  </section>
+
+  <!-- NOTES -->
+  <section id="notes" class="screen">
+    <div class="navbar nt-bar"><button class="link back-btn">Home</button><h1 id="ntTitle">Notes</h1></div>
+    <div class="list nt-list" id="ntList"></div>
+  </section>
+  <section id="note" class="screen">
+    <div class="navbar nt-bar"><button class="link back-btn">Notes</button><h1>Note</h1></div>
+    <div class="nt-paper"><div class="nt-date" id="ntDate"></div><div class="nt-text" id="ntText"></div></div>
+  </section>
+
+  <!-- COMPASS -->
+  <section id="compass" class="screen">
+    <div class="navbar"><button class="link back-btn">Home</button><h1>Compass</h1></div>
+    <div class="cp-body">
+      <div class="cp-dial-wrap"><div class="cp-lubber"></div><div class="cp-dial" id="cpDial"></div></div>
+      <div class="cp-read" id="cpRead">— °</div>
+      <div class="cp-msg" id="cpMsg"></div>
+      <button class="action" id="cpStart">Start compass</button>
+    </div>
+  </section>
+
   <!-- SETTINGS (decoy; "Report" at the bottom opens the organiser's session report) -->
   <section id="settings" class="screen">
     <div class="navbar"><button class="link back-btn">Home</button><h1>Settings</h1></div>
@@ -335,8 +402,12 @@ const CONFIG = {
     "understand","dont get","don t get","confused","stuck","no idea","dont know","don t know","what do you mean","explain"],
 
   // Link sent on arrival (next stage of the adventure)
-  NEXT_LINK: "https://example.com/next-stage",
-  NEXT_LINK_LABEL: "Grandfather's papers",
+  // Book box (old Telstra payphone, 40 Hall St). PROVISIONAL position, to be measured on site.
+  BOOKBOX: { lat: -33.89012, lng: 151.27256 },
+  BOOKBOX_RADIUS_M: 40,
+  // Compass bearings given by Adam (as shown by the phone's compass, i.e. magnetic). PROVISIONAL, check on site.
+  BEARING_1: 20,    // from the Astra, north along Campbell Parade
+  BEARING_2: 295,   // up Hall St to the payphone
 
   STORAGE_KEY: "bondi-phone-v4"   // v4 = new story (Adam's own phone)
 };
@@ -442,7 +513,7 @@ const PADDY = {
     "1906. North Bondi. My club, and don't let the Bondi lot tell you otherwise.",
     "Alright. You've done your homework.",
     "But I don't know you. I don't tell anyone anything until I've looked them in the eye.",
-    "Meet me on the promenade, in front of the Frangipani Girl. She's painted on the sea wall.",
+    "Meet me where Grandad took the last photo on his phone.",
     "Share your location so I know you're coming."
   ],
   clubDecoy: [
@@ -458,10 +529,10 @@ const PADDY = {
     "There are two surf clubs on this beach. Each one wears its founding date on its clubhouse.",
     "Compare North Bondi Surf Life Saving Club with Bondi Surf Bathers Life Saving Club. The older one wins."
   ],
-  locationOk: ["Good. I'll be watching for you.", "If you can't find her, just ask."],
+  locationOk: ["Good. I'll be watching for you.", "If you can't find the place, just ask."],
   locationDenied: ["No location, no meeting. I'm not a fool.", "Try again when you've made up your mind."],
-  travelling: "The Frangipani Girl. On the sea wall, along the promenade. Ask if you can't find her.",
-  help: ["Here, that's her.", {img:"frangipani"}, "On the sea wall, along the promenade."],
+  travelling: "Where Grandad took the last photo on his phone. Ask if you can't find it.",
+  help: ["She's on the sea wall, along the promenade, near the skate park."],
   // At the Frangipani Girl: Paddy wants one more proof
   arrived: [
     "There you are.",
@@ -477,10 +548,24 @@ const PADDY = {
   // At the Homestead site: final message + link
   verified: [
     "Good. You've done your reading.",
-    "My grandfather knew you'd come one day. Here's what he left for you."
+    "Grandad made me learn his directions by heart. Word for word:",
+    "\"Put the A behind you and walk at " + CONFIG.BEARING_1 + "° until you reach the street named after a hall.\"",
+    "\"Then turn to " + CONFIG.BEARING_2 + "° and look for the telephone that no longer rings.\"",
+    "\"Among strangers' stories, one of them is mine.\"",
+    "He had a compass on that phone. Use it."
   ],
-  notHereFar: "You're nowhere near. The promenade, along the sea wall.",
-  notHereNear: "Can't see you yet. Ask me if you need a hand finding her.",
+  boxTravelling: "Grandad's directions: " + CONFIG.BEARING_1 + "° to the street named after a hall, then " + CONFIG.BEARING_2 + "° to the telephone that no longer rings.",
+  boxHelp: ["Open the compass on Grandad's phone and follow his numbers.", "The street is Hall Street. Look for an old phone booth, and what stands next to it."],
+  boxNotHereFar: "You're nowhere near. Use the compass: " + CONFIG.BEARING_1 + "°, then " + CONFIG.BEARING_2 + "°.",
+  boxNotHereNear: "Close. Look for the telephone that no longer rings.",
+  atBox: [
+    "You found it.",
+    "Grandad's book is in there. Locked, of course.",
+    "He never could remember numbers. He wrote everything down in his notes.",
+    "Whatever you find inside, think hard before you hand it to anyone."
+  ],
+  notHereFar: "You're nowhere near. Look at the photo again.",
+  notHereNear: "Can't see you yet. Ask me if you need a hand finding the place.",
   afterEnd: "That's all I've got. Good luck with it."
 };
 
@@ -492,13 +577,14 @@ let state = {unlocked:false, stage:"intro", introTries:0, log:[], startedAt:null
 //         -> travelling (Frangipani Girl) -> verify (Homestead site) -> done
 // Session report: 1 penalty point per hint asked and per wrong answer (see the hidden report screen)
 const STEP = {passcode:"Phone passcode", explain:"What do you want?", quote:"Sam's words", motto:"RAF motto", club:"Oldest surf club",
-  location:"Share location", travelling:"Frangipani Girl", verify:"The Homestead"};
+  location:"Share location", travelling:"Frangipani Girl", verify:"The Homestead", bookbox:"Book box"};
 function penalize(kind, detail, step){
   (state.log = state.log || []).push({k:kind, s:step||state.stage, d:(detail||"").slice(0,60), t:Date.now()}); save();
 }
-const walking = () => state.stage==="travelling" || state.stage==="verify";
-const currentTarget = () => state.stage==="verify"
-  ? {pt:CONFIG.CHECK, r:CONFIG.CHECK_RADIUS_M} : {pt:CONFIG.TARGET, r:CONFIG.RADIUS_M};
+const walking = () => state.stage==="travelling" || state.stage==="verify" || state.stage==="bookbox";
+const currentTarget = () => state.stage==="verify" ? {pt:CONFIG.CHECK, r:CONFIG.CHECK_RADIUS_M}
+  : state.stage==="bookbox" ? {pt:CONFIG.BOOKBOX, r:CONFIG.BOOKBOX_RADIUS_M}
+  : {pt:CONFIG.TARGET, r:CONFIG.RADIUS_M};
 function save(){ try{ localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
 function load(){ try{ const s = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY)); if(s) state = Object.assign(state, s); }catch(e){} }
 load();
@@ -587,15 +673,15 @@ function press(k){
 const APPS = [
   {name:"Text",       icon:"💬", bg:"linear-gradient(#a6e86c,#3fa313)", open:()=>go("messages"), badge:true},
   {name:"Calendar",   icon:"📅", bg:"linear-gradient(#fff,#ddd)"},
-  {name:"Photos",     icon:"🌻", bg:"linear-gradient(#7ec0ff,#2f6fd1)"},
+  {name:"Photos",     icon:"🌻", bg:"linear-gradient(#7ec0ff,#2f6fd1)", open:()=>go("photos")},
   {name:"Camera",     icon:"📷", bg:"linear-gradient(#bbb,#555)"},
   {name:"YouTube",    icon:"📺", bg:"linear-gradient(#ff8a80,#c4120b)"},
   {name:"Stocks",     icon:"📈", bg:"linear-gradient(#555,#111)"},
   {name:"Maps",       icon:"🗺️", bg:"linear-gradient(#d8f0b8,#7cb342)"},
   {name:"Weather",    icon:"⛅", bg:"linear-gradient(#7fbaf5,#1f5fbf)"},
-  {name:"Clock",      icon:"🕰️", bg:"linear-gradient(#444,#000)"},
+  {name:"Compass",    icon:"🧭", bg:"linear-gradient(#555,#111)", open:()=>go("compass")},
   {name:"Calculator", icon:"🔢", bg:"linear-gradient(#ffb74d,#e65100)"},
-  {name:"Notes",      icon:"📝", bg:"linear-gradient(#fff6c2,#f2c94c)"},
+  {name:"Notes",      icon:"📝", bg:"linear-gradient(#fff6c2,#f2c94c)", open:()=>go("notes")},
   {name:"Settings",   icon:"⚙️", bg:"linear-gradient(#c8c8c8,#7d7d7d)", open:()=>go("settings")}
 ];
 const DOCK = [
@@ -705,13 +791,18 @@ $("chatAvatar").onclick = $("chatWho").onclick = ()=>{ if(chatWith) go("card", c
    screen. The browser / Android back button is wired to the same stack. */
 let stack = [];
 let histOK = true, ignorePop = 0;
-const BACK_LABEL = {settings:"Settings", home:"Home", contacts:"All Contacts", messages:"Messages", card:"Info", chat:"Back"};
+const BACK_LABEL = {photos:"Camera Roll", viewer:"Photo", notes:"Notes", note:"Note", compass:"Compass", settings:"Settings", home:"Home", contacts:"All Contacts", messages:"Messages", card:"Info", chat:"Back"};
 function render(e, fresh){
   if(e.name==="home") goHome();
   else if(e.name==="contacts") openContacts(fresh);
   else if(e.name==="card") openCard(e.arg);
   else if(e.name==="messages") openMessages();
   else if(e.name==="settings") openSettings();
+  else if(e.name==="photos") openPhotos();
+  else if(e.name==="viewer") openViewer(e.arg);
+  else if(e.name==="notes") openNotes();
+  else if(e.name==="note") openNote(e.arg);
+  else if(e.name==="compass") openCompass();
   else if(e.name==="chat") openChat(e.arg);
   const prev = stack[stack.length-2];
   document.querySelectorAll(".back-btn").forEach(b=>{ b.textContent = (prev ? BACK_LABEL[prev.name] : "Home"); });
@@ -869,6 +960,8 @@ async function sendMsg(){
     if(isHelp(text)){ penalize("hint", text); await paddySays(PADDY.help); } else await paddySays([PADDY.travelling]);
   } else if(state.stage==="verify"){
     if(isHelp(text)){ penalize("hint", text); await paddySays(PADDY.checkHelp); } else await paddySays([PADDY.checkTravelling]);
+  } else if(state.stage==="bookbox"){
+    if(isHelp(text)){ penalize("hint", text); await paddySays(PADDY.boxHelp); } else await paddySays([PADDY.boxTravelling]);
   } else {
     await paddySays([PADDY.afterEnd]);
   }
@@ -986,8 +1079,10 @@ $("imhere").onclick = ()=>{
     if(walking()){
       const d = Math.round(distance({lat:pos.coords.latitude,lng:pos.coords.longitude}, currentTarget().pt));
       $("gpstext").textContent = "Sharing location";
-      const v = state.stage==="verify";
-      paddySays([ d>400 ? (v ? PADDY.checkNotHereFar : PADDY.notHereFar) : (v ? PADDY.checkNotHereNear : PADDY.notHereNear) ]);
+      const far = d>400, st = state.stage;
+      paddySays([ st==="verify" ? (far ? PADDY.checkNotHereFar : PADDY.checkNotHereNear)
+                : st==="bookbox" ? (far ? PADDY.boxNotHereFar : PADDY.boxNotHereNear)
+                : (far ? PADDY.notHereFar : PADDY.notHereNear) ]);
     }
   }, ()=>{ $("gpstext").textContent = "Location unavailable — check your settings"; },
   {enableHighAccuracy:true, timeout:15000, maximumAge:0});
@@ -1001,9 +1096,14 @@ async function arrive(){
     // Frangipani Girl reached -> security check at the Homestead site (location sharing continues)
     state.stage = "verify"; save();
     await paddySays(PADDY.arrived);
+  } else if(state.stage==="verify"){
+    // The Homestead site (Hotel Astra) reached -> Adam's compass directions to the book box
+    state.stage = "bookbox"; save();
+    await paddySays(PADDY.verified);
   } else {
+    // Book box reached: the code is in Adam's Notes, the rest happens offline (contract + choice)
     state.stage = "done"; state.finishedAt = Date.now(); save(); stopWatch(); updateStageUI();
-    await paddySays([...PADDY.verified, {text:"🔗 " + CONFIG.NEXT_LINK_LABEL, link:CONFIG.NEXT_LINK}]);
+    await paddySays(PADDY.atBox);
   }
   if(navigator.vibrate) navigator.vibrate([200,100,200]);
   arriving = false;
@@ -1027,6 +1127,101 @@ function showReport(){
   $("report").classList.add("show");
 }
 $("rpClose").onclick = ()=>$("report").classList.remove("show");
+/* ================== PHOTOS (Adam's camera roll) ==================
+   Kim's photos, oldest first. The LAST one is the Frangipani Girl: Patrick says
+   "Meet me where Grandad took the last photo on his phone." */
+const ROLL = [
+  ["2007-07-14"],["2007-08-02"],["2007-09-09"],["2007-09-30"],["2007-10-21"],["2007-11-11"],["2007-11-25"],["2007-12-08"],
+  ["2007-12-27"],["2008-01-05"],["2008-01-19"],["2008-01-26"],["2008-02-10"],["2008-02-17"],["2008-02-24"],["2008-03-02"],["2008-03-15"]
+].map((r,i)=>({src:"roll/"+String(i+1).padStart(2,"0")+".jpg", thumb:"roll/"+String(i+1).padStart(2,"0")+"t.jpg", date:r[0]}));
+function fmtDate(iso){ const d=new Date(iso+"T12:00:00"); return d.toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric"}); }
+function openPhotos(){
+  if(!$("phGrid").children.length){
+    ROLL.forEach((p,i)=>{ const im=document.createElement("img"); im.src=p.thumb; im.alt=""; im.loading="lazy"; im.onclick=()=>go("viewer", i); $("phGrid").appendChild(im); });
+    $("phCount").textContent = ROLL.length + " Photos";
+  }
+  show("photos");
+  const l=document.querySelector("#photos .list"); l.scrollTop=l.scrollHeight;   // newest at the bottom, like iPhone
+}
+let vwIdx = 0;
+function openViewer(i){
+  vwIdx = Math.max(0, Math.min(ROLL.length-1, i|0));
+  $("vwImg").src = ROLL[vwIdx].src;
+  $("vwTitle").textContent = (vwIdx+1) + " of " + ROLL.length;
+  $("vwDate").textContent = fmtDate(ROLL[vwIdx].date);
+  $("vwPrev").style.visibility = vwIdx>0 ? "visible" : "hidden";
+  $("vwNext").style.visibility = vwIdx<ROLL.length-1 ? "visible" : "hidden";
+  show("viewer");
+}
+$("vwPrev").onclick = ()=>openViewer(vwIdx-1);
+$("vwNext").onclick = ()=>openViewer(vwIdx+1);
+(function(){ let x0=null; const st=$("vwStage");
+  st.addEventListener("touchstart",e=>{x0=e.touches[0].clientX;},{passive:true});
+  st.addEventListener("touchend",e=>{ if(x0===null) return; const dx=e.changedTouches[0].clientX-x0;
+    if(dx<-40) openViewer(vwIdx+1); else if(dx>40) openViewer(vwIdx-1); x0=null; }); })();
+
+/* ================== NOTES ==================
+   The "Lock" note gives the 4-digit code of the padlocked book: 3 8 7 6
+   (3 children: Eileen, Thomas, Rose · 8 arms of the starfish · 1917 -> 7 · 1906 -> 6) */
+const NOTES = [
+  {d:"2008-03-12", t:"Shopping", b:"milk\nbread (the good one)\nbait for Sunday\nsnail pellets for Sheila's tomatoes\nbatteries for the radio"},
+  {d:"2008-03-10", t:"Lock", b:"Lock — in case I forget (I will)\n\nSame trick as the phone. Four numbers nobody else would know:\n\n1. How many children Margaret gave me.\n2. The arms of the one who sleeps in the sand.\n3. The last figure of the year that paper was signed.\n4. Whoever came first on this beach: the last figure of their year."},
+  {d:"2008-03-05", t:"Bowls", b:"Pennant Sat 1pm with Kev\nBev's number is in the phone\nDON'T let Kev skip again"},
+  {d:"2008-03-03", t:"Books to return", b:"A History of Waverley (overdue!!)\nthe fishing one for Gary"},
+  {d:"2008-02-28", t:"Last day speech", b:"Thank the girls at the front desk\nSeven years. Paperwork, mostly.\nDon't mention the strongroom."},
+  {d:"2008-02-24", t:"Sunday", b:"Ben Buckler, 6am, with P.\nhe brings the coffee, I bring the bait"}
+];
+function openNotes(){
+  $("ntTitle").textContent = "Notes (" + NOTES.length + ")";
+  $("ntList").innerHTML = NOTES.map((n,i)=>`<div class="nt-row" data-i="${i}"><span>${n.t}</span><span>${new Date(n.d+"T12:00:00").toLocaleDateString("en-AU",{day:"numeric",month:"short"})}</span></div>`).join("");
+  $("ntList").querySelectorAll(".nt-row").forEach(r=>r.onclick=()=>go("note", +r.dataset.i));
+  show("notes");
+}
+function openNote(i){
+  const n = NOTES[i]; $("ntDate").textContent = fmtDate(n.d); $("ntText").textContent = n.b; show("note");
+}
+
+/* ================== COMPASS ==================
+   iPhone: webkitCompassHeading (magnetic north). Android: deviceorientationabsolute.
+   iOS asks for permission on the first tap of "Start compass". */
+(function(){
+  const dial = $("cpDial");
+  ["N","E","S","W"].forEach((l,k)=>{ const s=document.createElement("span"); s.textContent=l; if(l==="N") s.className="n";
+    s.style.transform=`rotate(${k*90}deg) translate(-50%,-112px)`; dial.appendChild(s); });
+  for(let a=30;a<360;a+=30){ if(a%90===0) continue; const t=document.createElement("i"); t.textContent=a;
+    t.style.transform=`rotate(${a}deg) translate(-50%,-112px)`; dial.appendChild(t); }
+})();
+let cpOn = false, cpGot = false;
+const DIRS = ["N","NE","E","SE","S","SW","W","NW"];
+function cpShow(h){
+  cpGot = true; h = (h+360)%360;
+  $("cpDial").style.transform = `rotate(${-h}deg)`;
+  $("cpRead").textContent = Math.round(h) + "° " + DIRS[Math.round(h/45)%8];
+  $("cpMsg").textContent = "";
+}
+function cpHandler(e){
+  if(typeof e.webkitCompassHeading === "number") cpShow(e.webkitCompassHeading);
+  else if(e.absolute && e.alpha !== null) cpShow(360 - e.alpha);
+}
+async function startCompass(){
+  $("cpMsg").textContent = "Hold the phone flat, top pointing ahead.";
+  try{
+    if(typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function"){
+      const r = await DeviceOrientationEvent.requestPermission();
+      if(r !== "granted"){ $("cpMsg").textContent = "Compass access was refused. Allow motion & orientation access and try again."; return; }
+    }
+  }catch(e){}
+  if(!cpOn){
+    window.addEventListener("deviceorientationabsolute", cpHandler, true);
+    window.addEventListener("deviceorientation", cpHandler, true);
+    cpOn = true;
+  }
+  $("cpStart").style.display = "none";
+  setTimeout(()=>{ if(!cpGot){ $("cpMsg").textContent = "No compass found on this device."; $("cpStart").style.display = ""; } }, 3000);
+}
+$("cpStart").onclick = startCompass;
+function openCompass(){ show("compass"); if(cpOn) $("cpStart").style.display = "none"; }
+
 function openSettings(){
   const row = (ico, bg, label, val, sw) => `<div class="st-row"><span class="st-ico" style="background:${bg}">${ico}</span>${label}${
     sw ? `<span class="st-sw">OFF</span>` : `<span class="st-val">${val||""}</span><span class="st-chev">&rsaquo;</span>`}</div>`;
