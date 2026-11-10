@@ -575,11 +575,10 @@ const PADDY = {
   boxHelp: ["Open the compass on Grandad's phone and follow his numbers.", "The street is Hall Street. Look for an old phone booth, and what stands next to it."],
   boxNotHereFar: "You're nowhere near. Use the compass: " + CONFIG.BEARING_1 + "°, then " + CONFIG.BEARING_2 + "°.",
   boxNotHereNear: "Close. Look for the telephone that no longer rings.",
-  atBox: [
-    "You found it.",
+  // At the book box Patrick stays silent; this is only sent if players ask for help (1 penalty point)
+  boxCodeHelp: [
     "Grandad's book is in there. Locked, of course.",
-    "He never could remember numbers. He wrote everything down in his notes.",
-    "Whatever you find inside, think hard before you hand it to anyone."
+    "He never could remember numbers. He wrote everything down in his notes."
   ],
   notHereFar: "You're nowhere near. Look at the photo again.",
   notHereNear: "Can't see you yet. Ask me if you need a hand finding the place.",
@@ -594,7 +593,7 @@ let state = {unlocked:false, stage:"intro", introTries:0, log:[], startedAt:null
 //         -> travelling (Frangipani Girl) -> icebergs (year by text, 1929) -> verify (Homestead site) -> bookbox -> done
 // Session report: 1 penalty point per hint asked and per wrong answer (see the hidden report screen)
 const STEP = {passcode:"Phone passcode", explain:"What do you want?", quote:"Sam's words", motto:"RAF motto", club:"Oldest surf club",
-  location:"Share location", travelling:"Frangipani Girl", icebergs:"Icebergs year", verify:"The Homestead", bookbox:"Book box"};
+  location:"Share location", travelling:"Frangipani Girl", icebergs:"Icebergs year", verify:"The Homestead", bookbox:"Book box", done:"Book code"};
 function penalize(kind, detail, step){
   (state.log = state.log || []).push({k:kind, s:step||state.stage, d:(detail||"").slice(0,60), t:Date.now()}); save();
 }
@@ -996,7 +995,7 @@ async function sendMsg(){
   } else if(state.stage==="bookbox"){
     if(isHelp(text)){ penalize("hint", text); await paddySays(PADDY.boxHelp); } else await paddySays([PADDY.boxTravelling]);
   } else {
-    await paddySays([PADDY.afterEnd]);
+    if(isHelp(text)){ penalize("hint", text); await paddySays(PADDY.boxCodeHelp); } else await paddySays([PADDY.afterEnd]);
   }
 }
 
@@ -1135,8 +1134,9 @@ async function arrive(){
     await paddySays(PADDY.verified);
   } else {
     // Book box reached: the code is in Adam's Notes, the rest happens offline (contract + choice)
+    // Patrick says nothing: players search the box themselves (help on request only)
     state.stage = "done"; state.finishedAt = Date.now(); save(); stopWatch(); updateStageUI();
-    await paddySays(PADDY.atBox);
+    arriving = false; return;
   }
   if(navigator.vibrate) navigator.vibrate([200,100,200]);
   arriving = false;
