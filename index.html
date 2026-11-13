@@ -535,7 +535,10 @@ const PADDY = {
   locationOk: ["Good. I'll be watching for you.", "If you can't find the place, just ask."],
   locationDenied: ["No location, no meeting. I'm not a fool.", "Try again when you've made up your mind."],
   travelling: "Where Grandad took the last photo on his phone. Ask if you can't find it.",
-  help: ["She's on the sea wall, along the promenade, near the skate park."],
+  helpHints: [
+    ["Grandad had a Photos app on that phone. Look at the very last picture."],
+    ["She's on the sea wall, along the promenade, near the skate park."]
+  ],
   // At the Frangipani Girl: Paddy wants one more proof
   arrived: [
     "There you are.",
@@ -981,7 +984,7 @@ async function sendMsg(){
   } else if(state.stage==="location"){
     await paddySays(isHintRequest(text) ? PADDY.locationHint : ["Share your location first."]);
   } else if(state.stage==="travelling"){
-    if(isHelp(text)){ penalize("hint", text); await paddySays(PADDY.help); } else await paddySays([PADDY.travelling]);
+    if(isHelp(text)){ await giveHint(PADDY.helpHints, text); } else await paddySays([PADDY.travelling]);
   } else if(state.stage==="icebergs"){
     // Founding year of the Bondi Icebergs Club (1929) = padlock code
     const years = text.match(/\b1[89]\d\d\b/g) || [];
