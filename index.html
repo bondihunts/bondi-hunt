@@ -544,8 +544,9 @@ const PADDY = {
     "There you are.",
     "You look like honest people.",
     "But I've been fooled before. Two things before I trust you.",
-    "First, walk to the Bondi Icebergs Club, at the end of the beach. Find the year it was founded. It's on the front of the club.",
-    "Text me the year when you have it. And write it down: you'll need it later."
+    "First, a bit of history. A band of Bondi lifesavers wanted to keep fit through the winter months.",
+    "So they formed their own winter swimming club, drew up a constitution and made a rule: swim three Sundays out of four, for five years, or you're out.",
+    "Find that club, and the year it was founded. Text it to me. Write it down too: you'll need it later."
   ],
   icebergsOk: [
     "1929. Good. Keep that number safe.",
@@ -553,15 +554,15 @@ const PADDY = {
     "If you really have my grandfather's notebook, you'll know where that is. I'll know when you're there."
   ],
   icebergsWrong: [
-    "That's not what's on the wall.",
-    "No. Look at the front of the club again. Ask me if you need a hint.",
-    "Still no. Ask me if you need a hint."
+    "That's not the right year.",
+    "No. Ask me if you need a hint.",
+    "Still no."
   ],
-  icebergsHint: [
-    "The Icebergs is the club with the pool, at the south end of the beach.",
-    "Its founding year is written on the front of the club."
+  icebergsHints: [
+    ["That's the Bondi Icebergs Club."],
+    ["Check the map in the notebook: the Icebergs is at the south end of the beach, by the pool. The year is on the front of the club."]
   ],
-  icebergsWaiting: "The Icebergs first. Text me the year on the front of the club.",
+  icebergsWaiting: "The winter swimmers' club first. Text me the year it was founded.",
   checkTravelling: "Where The Homestead stood. It's all in Adam's notebook.",
   checkHelp: ["Read the old papers in the notebook. Grandad kept everything.", "The house is long gone. Something else stands there now."],
   checkNotHereFar: "Not even close. Read the notebook again.",
@@ -993,7 +994,7 @@ async function sendMsg(){
       await paddySays(PADDY.icebergsOk);
       updateStageUI();
     } else if(!years.length && isHelp(text)){
-      penalize("hint", text); await paddySays(PADDY.icebergsHint);
+      await giveHint(PADDY.icebergsHints, text);
     } else if(!years.length){
       await paddySays([PADDY.icebergsWaiting]);
     } else {
