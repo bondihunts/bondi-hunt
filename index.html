@@ -498,19 +498,19 @@ const PADDY = {
   // Question 1 — RAF motto
   mottoOk: [
     "Per ardua ad astra. Through adversity, to the stars.",
-    "Good. Keep those stars in mind, you never know.",
+    "Good.",
     "One more. Lifesavers are family on this beach, and two clubs have been squabbling for a hundred years over who came first.",
     "In what year was the oldest life saving club in Bondi founded?"
   ],
   mottoWrong: [
     "No. That's not it.",
     "Wrong again. If your memory fails you, ask me.",
-    "Still no. Ask me if you need a nudge."
+    "Still no."
   ],
-  mottoHint: [
+  mottoHints: [[
     "Forgotten already? Grandad would be ashamed of you.",
-    "Go and pay your respects at the North Bondi War Memorial, next to Biddigal Reserve, across the roundabout. The motto is written there, for the airmen."
-  ],
+    "Go and pay your respects at the North Bondi War Memorial, next to Biddigal Reserve, across the roundabout. The motto is written there."
+  ]],
   // Question 2 — oldest surf life saving club (North Bondi, 1906)
   clubOk: [
     "1906. North Bondi. My club, and don't let the Bondi lot tell you otherwise.",
@@ -956,7 +956,7 @@ async function sendMsg(){
       state.stage = "club"; state.qWrong = 0; save();
       await paddySays(PADDY.mottoOk);
     } else if(isHintRequest(text)){
-      penalize("hint", text); await paddySays(PADDY.mottoHint);
+      await giveHint(PADDY.mottoHints, text);
     } else {
       const line = PADDY.mottoWrong[Math.min(state.qWrong, PADDY.mottoWrong.length-1)];
       state.qWrong++; penalize("wrong", text);
