@@ -478,18 +478,22 @@ const PADDY = {
   ],
   // 3) Sam Fiszman's words
   wrong: [
-    "That's not Sam's words.",
-    "Still not Sam.",
+    "Those aren't Sam's words.",
     "Grandad always said words matter. Yours don't mean anything to me.",
-    "Still don't know you, mate."
+    "Still not Sam."
   ],
   explainHint: ["Some old paper Grandad hid?", "Something Grandad kept?"],
   locationHint: ["Tap the green button to share your location. I need to know you're coming."],
-  quoteHint: ["You don't know where to find them? His words are in the park that bears his name."],
+  // Tiered hints: 1st request = hint 1, 2nd request = hint 2 (1 point each); after that hint 2 is repeated for free
+  quoteHints: [
+    ["His words are in the park that bears his name."],
+    ["Sam Fiszman Park is up on Ben Buckler, at the north end of the beach. Look for his plaque."]
+  ],
   accepted: [
     "OK, that's a first step.",
     "But I'll need more than that before I trust you.",
-    "My great-grandad was in the Royal Air Force. What's their motto?"
+    "My great-grandad was in the Royal Air Force. What's their motto?",
+    "Ask me if you need a hint."
   ],
   // Question 1 — RAF motto
   mottoOk: [
@@ -591,6 +595,13 @@ let state = {unlocked:false, stage:"intro", introTries:0, log:[], startedAt:null
 // Session report: 1 penalty point per hint asked and per wrong answer (see the hidden report screen)
 const STEP = {passcode:"Phone passcode", explain:"What do you want?", quote:"Sam's words", motto:"RAF motto", club:"Oldest surf club",
   location:"Share location", travelling:"Frangipani Girl", icebergs:"Icebergs year", verify:"The Homestead", bookbox:"Book box", done:"Book code"};
+// Tiered hints for the current stage: each new level costs 1 point; once all are used, the last one is repeated for free
+async function giveHint(levels, text){
+  state.hintsUsed = state.hintsUsed || {};
+  const n = state.hintsUsed[state.stage] || 0;
+  if(n < levels.length){ penalize("hint", text); state.hintsUsed[state.stage] = n + 1; save(); await paddySays(levels[n]); }
+  else await paddySays(levels[levels.length-1]);
+}
 function penalize(kind, detail, step){
   (state.log = state.log || []).push({k:kind, s:step||state.stage, d:(detail||"").slice(0,60), t:Date.now()}); save();
 }
@@ -932,11 +943,11 @@ async function sendMsg(){
       state.stage = "motto"; state.qWrong = 0; save();
       await paddySays(PADDY.accepted);
     } else {
-      if(isHintRequest(text)){ penalize("hint", text); await paddySays(PADDY.quoteHint); }
+      if(isHintRequest(text)){ await giveHint(PADDY.quoteHints, text); }
       else {
         const line = PADDY.wrong[Math.min(state.wrongCount, PADDY.wrong.length-1)];
         state.wrongCount++; penalize("wrong", text);
-        await paddySays(state.wrongCount===2 ? [line, ...PADDY.quoteHint] : [line]);
+        await paddySays([line]);
       }
     }
   } else if(state.stage==="motto"){
