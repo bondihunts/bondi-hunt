@@ -574,20 +574,25 @@ const PADDY = {
   // At the Homestead site: final message + link
   verified: [
     "Good. You've done your reading.",
-    "Grandad made me learn his directions by heart. Word for word:",
-    "\"Head north.\"",
-    "\"At the crossroads where nobody makes calls any more, turn left.\"",
-    "\"Keep going until the second street to the north.\"",
-    "\"Follow it to the crossroads. Look for an old phone booth, and what stands next to it.\""
+    "Now, head north.",
+    "At the crossroads where nobody makes calls any more, turn left.",
+    "Keep going until the second street to the north.",
+    "Follow it to the crossroads.",
+    "What does 'pulchritudinous' mean? The contract is in the answer."
   ],
-  boxTravelling: "Grandad's directions: north. Left at the crossroads where nobody makes calls any more. On to the second street to the north. Then the crossroads: an old phone booth, and what stands next to it.",
-  boxHelp: ["He had a compass on that phone. Use it.", "Take his directions one line at a time."],
-  boxNotHereFar: "You're nowhere near. Read Grandad's directions again, one line at a time.",
-  boxNotHereNear: "Close. Look for the telephone that no longer rings.",
-  // At the book box Patrick stays silent; this is only sent if players ask for help (1 penalty point)
-  boxCodeHelp: [
-    "Grandad's book is in there. Locked, of course.",
-    "He never could remember numbers. He wrote everything down in his notes."
+  boxTravelling: "North. Left at the crossroads where nobody makes calls any more. On to the second street to the north. Then follow it to the crossroads.",
+  boxHints: [
+    ["He had a compass on that phone. Use it.", "Take his directions one line at a time."],
+    ["Take Lamrock Ave, then Consett Ave until the intersection with Hall St."]
+  ],
+  boxNotHereFar: "You're nowhere near. Take the directions again, one line at a time.",
+  boxNotHereNear: "Close. Follow it to the crossroads.",
+  // At the book box Patrick stays silent; hints only on request (1 point each):
+  // the book (fake "New English Dictionary" with a 3-digit safe inside), then the code (Notes, then the two years)
+  boxCodeHints: [
+    ["People offer books for free here, what a nice initiative. One of them is an English dictionary."],
+    ["Grandad never could remember numbers. He wrote everything down in his notes."],
+    ["You already have the Icebergs year. The other date is in the notebook."]
   ],
   notHereFar: "You're nowhere near. Look at the photo again.",
   notHereNear: "Can't see you yet. Ask me if you need a hand finding the place.",
@@ -602,7 +607,7 @@ let state = {unlocked:false, stage:"intro", introTries:0, log:[], startedAt:null
 //         -> travelling (Frangipani Girl) -> icebergs (year by text, 1929) -> verify (Homestead site) -> bookbox -> done
 // Session report: 1 penalty point per hint asked and per wrong answer (see the hidden report screen)
 const STEP = {passcode:"Phone passcode", explain:"What do you want?", quote:"Sam's words", motto:"RAF motto", club:"Oldest surf club",
-  location:"Share location", travelling:"Frangipani Girl", icebergs:"Icebergs year", verify:"The Homestead", bookbox:"Book box", done:"Book code"};
+  location:"Share location", travelling:"Frangipani Girl", icebergs:"Icebergs year", verify:"The Homestead", bookbox:"Book box", done:"Book & code"};
 // Tiered hints for the current stage: each new level costs 1 point; once all are used, the last one is repeated for free
 async function giveHint(levels, text){
   state.hintsUsed = state.hintsUsed || {};
@@ -1009,9 +1014,9 @@ async function sendMsg(){
   } else if(state.stage==="verify"){
     if(isHelp(text)){ await giveHint(PADDY.checkHints, text); } else await paddySays([PADDY.checkTravelling]);
   } else if(state.stage==="bookbox"){
-    if(isHelp(text)){ penalize("hint", text); await paddySays(PADDY.boxHelp); } else await paddySays([PADDY.boxTravelling]);
+    if(isHelp(text)){ await giveHint(PADDY.boxHints, text); } else await paddySays([PADDY.boxTravelling]);
   } else {
-    if(isHelp(text)){ penalize("hint", text); await paddySays(PADDY.boxCodeHelp); } else await paddySays([PADDY.afterEnd]);
+    if(isHelp(text)){ await giveHint(PADDY.boxCodeHints, text); } else await paddySays([PADDY.afterEnd]);
   }
 }
 
