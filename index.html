@@ -589,8 +589,14 @@ const PADDY = {
   boxNotHereNear: "Close. Follow it to the crossroads.",
   // At the book box Patrick stays silent; hints only on request (1 point each):
   // the book (fake "New English Dictionary" with a 3-digit safe inside), then the code (Notes, then the two years)
+  // When players ask for help at the box, Patrick first asks whether they found the book (no penalty).
+  // Yes -> code hints; no -> book hint. If they already talk about a code / lock / numbers, he goes straight to the code hints.
+  boxAskWhat: "Have you found the book?",
+  boxAskAgain: "Yes or no: have you found the book?",
+  boxBookHints: [
+    ["People offer books for free here, what a nice initiative. One of them is an English dictionary."]
+  ],
   boxCodeHints: [
-    ["People offer books for free here, what a nice initiative. One of them is an English dictionary."],
     ["Grandad never could remember numbers. He wrote everything down in his notes."],
     ["You already have the Icebergs year. The other date is in the notebook."]
   ],
@@ -609,11 +615,29 @@ let state = {unlocked:false, stage:"intro", introTries:0, log:[], startedAt:null
 const STEP = {passcode:"Phone passcode", explain:"What do you want?", quote:"Sam's words", motto:"RAF motto", club:"Oldest surf club",
   location:"Share location", travelling:"Frangipani Girl", icebergs:"Icebergs year", verify:"The Homestead", bookbox:"Book box", done:"Book & code"};
 // Tiered hints for the current stage: each new level costs 1 point; once all are used, the last one is repeated for free
-async function giveHint(levels, text){
+async function giveHint(levels, text, key){
   state.hintsUsed = state.hintsUsed || {};
-  const n = state.hintsUsed[state.stage] || 0;
-  if(n < levels.length){ penalize("hint", text); state.hintsUsed[state.stage] = n + 1; save(); await paddySays(levels[n]); }
+  key = key || state.stage;
+  const n = state.hintsUsed[key] || 0;
+  if(n < levels.length){ penalize("hint", text); state.hintsUsed[key] = n + 1; save(); await paddySays(levels[n]); }
   else await paddySays(levels[levels.length-1]);
+}
+// Help at the book box: "About what?" first, then a book hint or a code hint depending on the answer
+const CODE_WORDS = ["code","codes","lock","locked","padlock","combination","number","numbers","digit","digits","safe","box","open","unlock","three","3","chiffre","chiffres"];
+const YES_WORDS = ["yes","yeah","yep","yup","ya","sure","got","found","have","did","oui","ok"];
+const NO_WORDS = ["no","nope","nah","not","haven","havent","didn","didnt","nothing","cant","can","where","non"];
+function mentions(text, words){ const t = " " + norm(text).replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ") + " "; return words.some(w => t.includes(" " + w + " ")); }
+async function boxHelp(text){
+  const code = mentions(text, CODE_WORDS);
+  if(code){ state.boxAsk = false; save(); return giveHint(PADDY.boxCodeHints, text, "done-code"); }
+  if(state.boxAsk){
+    // the first yes/no word wins ("yes, but we can't open it" = yes; "no, haven't found it" = no)
+    const first = norm(text).split(/\s+/).find(w => YES_WORDS.includes(w) || NO_WORDS.includes(w));
+    if(first && NO_WORDS.includes(first)){ state.boxAsk = false; save(); return giveHint(PADDY.boxBookHints, text, "done-book"); }
+    if(first && YES_WORDS.includes(first)){ state.boxAsk = false; save(); return giveHint(PADDY.boxCodeHints, text, "done-code"); }
+    return paddySays([PADDY.boxAskAgain]);
+  }
+  state.boxAsk = true; save(); await paddySays([PADDY.boxAskWhat]);
 }
 function penalize(kind, detail, step){
   (state.log = state.log || []).push({k:kind, s:step||state.stage, d:(detail||"").slice(0,60), t:Date.now()}); save();
@@ -1016,7 +1040,7 @@ async function sendMsg(){
   } else if(state.stage==="bookbox"){
     if(isHelp(text)){ await giveHint(PADDY.boxHints, text); } else await paddySays([PADDY.boxTravelling]);
   } else {
-    if(isHelp(text)){ await giveHint(PADDY.boxCodeHints, text); } else await paddySays([PADDY.afterEnd]);
+    if(state.boxAsk || isHelp(text)){ await boxHelp(text); } else await paddySays([PADDY.afterEnd]);
   }
 }
 
