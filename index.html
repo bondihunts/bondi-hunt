@@ -526,11 +526,11 @@ const PADDY = {
   clubWrong: [
     "No. Not even close.",
     "Wrong. Ask me if you need a hint.",
-    "Still no. Ask me if you need a hint."
+    "Still no."
   ],
-  clubHint: [
-    "There are two surf clubs on this beach. Each one wears its founding date on its clubhouse.",
-    "Compare North Bondi Surf Life Saving Club with Bondi Surf Bathers Life Saving Club. The older one wins."
+  clubHints: [
+    ["There are two surf clubs on this beach. Each one wears its founding date on its clubhouse."],
+    ["Check the map in the notebook: you'll see North Bondi Surf Life Saving Club and Bondi Surf Bathers Life Saving Club. The older one wins."]
   ],
   locationOk: ["Good. I'll be watching for you.", "If you can't find the place, just ask."],
   locationDenied: ["No location, no meeting. I'm not a fool.", "Try again when you've made up your mind."],
@@ -972,7 +972,7 @@ async function sendMsg(){
     } else if(years.includes(CONFIG.CLUB_DECOY)){
       penalize("wrong", text); await paddySays(PADDY.clubDecoy);
     } else if(!years.length && isHintRequest(text)){
-      penalize("hint", text); await paddySays(PADDY.clubHint);
+      await giveHint(PADDY.clubHints, text);
     } else {
       const line = PADDY.clubWrong[Math.min(state.qWrong, PADDY.clubWrong.length-1)];
       state.qWrong++; penalize("wrong", text);
