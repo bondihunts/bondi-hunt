@@ -564,7 +564,10 @@ const PADDY = {
   ],
   icebergsWaiting: "The winter swimmers' club first. Text me the year it was founded.",
   checkTravelling: "Where The Homestead stood. It's all in Adam's notebook.",
-  checkHelp: ["Read the old papers in the notebook. Grandad kept everything.", "The house is long gone. Something else stands there now."],
+  checkHints: [
+    ["Read the old papers in the notebook. Grandad kept everything."],
+    ["The house is long gone. A retirement home stands there now, with a big letter A on its roof."]
+  ],
   checkNotHereFar: "Not even close. Read the notebook again.",
   checkNotHereNear: "Nearly. Where The Homestead stood, exactly.",
   // At the Homestead site: final message + link
@@ -1003,7 +1006,7 @@ async function sendMsg(){
       await paddySays([line]);
     }
   } else if(state.stage==="verify"){
-    if(isHelp(text)){ penalize("hint", text); await paddySays(PADDY.checkHelp); } else await paddySays([PADDY.checkTravelling]);
+    if(isHelp(text)){ await giveHint(PADDY.checkHints, text); } else await paddySays([PADDY.checkTravelling]);
   } else if(state.stage==="bookbox"){
     if(isHelp(text)){ penalize("hint", text); await paddySays(PADDY.boxHelp); } else await paddySays([PADDY.boxTravelling]);
   } else {
