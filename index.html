@@ -647,7 +647,19 @@ const currentTarget = () => state.stage==="verify" ? {pt:CONFIG.CHECK, r:CONFIG.
   : state.stage==="bookbox" ? {pt:CONFIG.BOOKBOX, r:CONFIG.BOOKBOX_RADIUS_M}
   : {pt:CONFIG.TARGET, r:CONFIG.RADIUS_M};
 function save(){ try{ localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
-function load(){ try{ const s = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY)); if(s) state = Object.assign(state, s); }catch(e){} }
+function load(){
+  // Organiser reset link: https://bondihunts.github.io/bondi-hunt/?reset=1 wipes the saved game, then shows the locked phone
+  try{
+    const q = new URLSearchParams(location.search);
+    if(q.has("reset")){
+      localStorage.removeItem(CONFIG.STORAGE_KEY);
+      q.delete("reset");
+      history.replaceState(null, "", location.pathname + (q.toString() ? "?" + q : "") + location.hash);
+      return;
+    }
+  }catch(e){}
+  try{ const s = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY)); if(s) state = Object.assign(state, s); }catch(e){}
+}
 load();
 
 const $ = id => document.getElementById(id);
