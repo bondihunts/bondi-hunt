@@ -1140,20 +1140,24 @@ function requestLocation(){
   if(btn){ btn.textContent = "Locating… (allow location if asked)"; btn.disabled = true; }
   let settled = false;
   const watchdog = setTimeout(()=>{ if(!settled){ settled = true; locationFailed("timeout"); } }, 20000);
+  const ok = async pos=>{
+    if(settled) return; settled = true; clearTimeout(watchdog); locating = false;
+    state.locFailed = false; state.noGps = false;
+    pushPaddy({t:"sys", text:"You are sharing your live location with Paddy. Keep this screen open."});
+    state.stage = "travelling"; save();
+    updateStageUI();
+    await paddySays(PADDY.locationOk);
+    checkPosition(pos);
+  };
+  const ko = err=>{ if(settled) return; settled = true; clearTimeout(watchdog); locationFailed(err && err.code===1 ? "denied" : "timeout"); };
   try{
-    navigator.geolocation.getCurrentPosition(async pos=>{
-      if(settled) return; settled = true; clearTimeout(watchdog); locating = false;
-      state.locFailed = false; state.noGps = false;
-      pushPaddy({t:"sys", text:"You are sharing your live location with Paddy. Keep this screen open."});
-      state.stage = "travelling"; save();
-      updateStageUI();
-      await paddySays(PADDY.locationOk);
-      checkPosition(pos);
-    }, err=>{
-      if(settled) return; settled = true; clearTimeout(watchdog);
-      locationFailed(err && err.code===1 ? "denied" : "timeout");
-    }, {enableHighAccuracy:true, timeout:15000, maximumAge:30000});
-  }catch(e){ settled = true; clearTimeout(watchdog); locationFailed("timeout"); }
+    // 1st try: precise fix (8 s). If the phone is slow (not a refusal), 2nd try with a quicker, less precise fix.
+    navigator.geolocation.getCurrentPosition(ok, err=>{
+      if(settled) return;
+      if(err && err.code===1) return ko(err);
+      navigator.geolocation.getCurrentPosition(ok, ko, {enableHighAccuracy:false, timeout:10000, maximumAge:60000});
+    }, {enableHighAccuracy:true, timeout:8000, maximumAge:30000});
+  }catch(e){ ko(null); }
 }
 async function locationFailed(kind){
   locating = false;
