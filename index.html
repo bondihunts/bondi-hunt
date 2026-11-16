@@ -400,6 +400,7 @@ const CONFIG = {
   // Measured on site by Kim.
   CHECK: { lat: -33.893848, lng: 151.273026 },
   CHECK_RADIUS_M: 50,
+  CHECK_NUMBER: "34",   // street number of the Astra (34 Campbell Parade), asked when location is off
 
   // Messages that count as asking Paddy for help while looking for the mural
   HELP_WORDS: ["help","where","find","lost","photo","picture","pic","show","hint","cant","can t","clue",
@@ -565,6 +566,10 @@ const PADDY = {
     ["Check the map of Bondi: the Icebergs is at the south end of the beach, by the pool. The year is on the front of the club."]
   ],
   icebergsWaiting: "The winter swimmers' club first. Text me the year it was founded.",
+  // Location off: when players tap "I'm here" for The Homestead, Patrick checks the street number (34 Campbell Parade)
+  checkAskNumber: ["Are you sure? Tell me the street number of the building you're standing in front of."],
+  checkAskAgain: "Just the street number, please.",
+  checkWrongNumber: ["That's not where The Homestead stood.", "Tap \"I'm here\" again when you're in the right place."],
   checkTravelling: "Where The Homestead stood. It's all in Adam's notebook.",
   checkHints: [
     ["Read the old papers in the notebook. Grandad kept everything."],
@@ -1049,6 +1054,12 @@ async function sendMsg(){
       state.qWrong++; penalize("wrong", text);
       await paddySays([line]);
     }
+  } else if(state.stage==="verify" && state.askNumber){
+    const nums = text.match(/\b\d{1,4}\b/g) || [];
+    if(nums.includes(CONFIG.CHECK_NUMBER)){ state.askNumber = false; save(); await arrive(); }
+    else if(!nums.length && isHelp(text)){ await giveHint(PADDY.checkHints, text); }
+    else if(!nums.length){ await paddySays([PADDY.checkAskAgain]); }
+    else { penalize("wrong", text); state.askNumber = false; save(); await paddySays(PADDY.checkWrongNumber); }
   } else if(state.stage==="verify"){
     if(isHelp(text)){ await giveHint(PADDY.checkHints, text); } else await paddySays([PADDY.checkTravelling]);
   } else if(state.stage==="bookbox"){
@@ -1212,7 +1223,7 @@ function checkPosition(pos){
 
 $("imhere").onclick = ()=>{
   // Without GPS (refused or broken): trust the players
-  if(state.noGps || !("geolocation" in navigator)){ arrive(); return; }
+  if(state.noGps || !("geolocation" in navigator)){ trustedArrive(); return; }
   $("gpstext").textContent = "Checking your position…";
   let settled = false;
   const fail = ()=>{
@@ -1231,7 +1242,8 @@ $("imhere").onclick = ()=>{
     $("gpstext").textContent = "Sharing location";
     // Lenient when the players say they're there: GPS error margin counts in their favour,
     // and an approximate fix (Precise Location off) is trusted
-    if(d <= Math.max(r, 60) || d <= r + acc || acc > 300){ arrive(); return; }
+    if(d <= Math.max(r, 60) || d <= r + acc){ arrive(); return; }
+    if(acc > 300){ trustedArrive(); return; }   // approximate location only (Precise Location off)
     const far = d>400, st = state.stage;
     paddySays([ st==="verify" ? (far ? PADDY.checkNotHereFar : PADDY.checkNotHereNear)
               : st==="bookbox" ? (far ? PADDY.boxNotHereFar : PADDY.boxNotHereNear)
@@ -1240,6 +1252,17 @@ $("imhere").onclick = ()=>{
   {enableHighAccuracy:true, timeout:15000, maximumAge:10000});
 };
 
+// Arrival without a usable GPS position: trusted, except at the Astra where Patrick checks the street number (34),
+// so a team standing in the wrong place doesn't start Adam's directions from the wrong spot.
+async function trustedArrive(){
+  if(state.stage==="verify"){
+    if(busy) return;
+    state.askNumber = true; save();
+    await paddySays(PADDY.checkAskNumber);
+    return;
+  }
+  arrive();
+}
 let arriving = false;
 async function arrive(){
   if(arriving || !walking()) return;
