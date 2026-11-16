@@ -215,6 +215,8 @@ button{font-family:inherit}
 #send{height:32px;padding:0 12px;border-radius:7px;border:1px solid #2b4c80;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;
   background:linear-gradient(#8fb2e8,#3d6fc1 50%,#2f5fb3 51%,#4473c3);text-shadow:0 -1px 0 rgba(0,0,0,.4)}
 #send:disabled{opacity:.55}
+.action.alt{background:linear-gradient(#f4f4f4,#cfcfcf);color:#333;border-color:#999}
+.action:disabled{opacity:.7}
 #gpsbar{display:none;align-items:center;gap:8px;padding:6px 10px;font-size:13px;background:linear-gradient(#fdf6c9,#efe08a);color:#5a4a00;border-top:1px solid #c9b64e;font-weight:bold}
 #gpsbar .dot{width:8px;height:8px;border-radius:50%;background:#3a9b1a;animation:blink 1.6s infinite}
 #gpsbar button{margin-left:auto;border:1px solid #2b4c80;border-radius:6px;padding:4px 8px;color:#fff;font-size:12px;font-weight:bold;cursor:pointer;background:linear-gradient(#8fb2e8,#2f5fb3)}
@@ -1114,25 +1116,68 @@ function updateStageUI(){
   const inPaddy = chatWith==="paddy";
   $("gpsbar").style.display = (inPaddy && walking()) ? "flex" : "none";
   if(inPaddy && state.stage==="location"){
-    const b = document.createElement("button"); b.className="action"; b.textContent="📍 Share Live Location";
-    b.onclick = requestLocation; $("msgs").appendChild(b); scrollDown();
+    const b = document.createElement("button"); b.className="action"; b.id="shareBtn"; b.textContent="📍 Share Live Location";
+    b.onclick = requestLocation; $("msgs").appendChild(b);
+    if(state.locFailed){
+      const n = document.createElement("button"); n.className="action alt"; n.textContent="Continue without location";
+      n.onclick = continueWithoutGps; $("msgs").appendChild(n);
+    }
+    scrollDown();
   }
+  if(state.noGps && walking()) $("gpstext").textContent = "Location off — tap “I'm here” when you arrive";
   if(walking()) startWatch();
 }
 
+// Share Live Location. Field test 15 Nov 2026: on 3 phones out of 4 the button seemed to do nothing.
+// Now: immediate feedback, every outcome answered (denied / timeout / no answer at all from the phone),
+// and a "Continue without location" way out so the game can never be blocked here.
+let locating = false;
 function requestLocation(){
-  if(!("geolocation" in navigator)){ alert("Location isn't available on this device."); return; }
-  navigator.geolocation.getCurrentPosition(async pos=>{
-    pushPaddy({t:"sys", text:"You are sharing your live location with Paddy. Keep this screen open."});
-    state.stage = "travelling"; save();
-    updateStageUI();
-    await paddySays(PADDY.locationOk);
-    checkPosition(pos);
-  }, async ()=>{ await paddySays(PADDY.locationDenied); },
-  {enableHighAccuracy:true, timeout:15000, maximumAge:0});
+  if(locating) return;
+  const btn = $("shareBtn");
+  if(!("geolocation" in navigator)){ return locationFailed("unsupported"); }
+  locating = true;
+  if(btn){ btn.textContent = "Locating… (allow location if asked)"; btn.disabled = true; }
+  let settled = false;
+  const watchdog = setTimeout(()=>{ if(!settled){ settled = true; locationFailed("timeout"); } }, 20000);
+  try{
+    navigator.geolocation.getCurrentPosition(async pos=>{
+      if(settled) return; settled = true; clearTimeout(watchdog); locating = false;
+      state.locFailed = false; state.noGps = false;
+      pushPaddy({t:"sys", text:"You are sharing your live location with Paddy. Keep this screen open."});
+      state.stage = "travelling"; save();
+      updateStageUI();
+      await paddySays(PADDY.locationOk);
+      checkPosition(pos);
+    }, err=>{
+      if(settled) return; settled = true; clearTimeout(watchdog);
+      locationFailed(err && err.code===1 ? "denied" : "timeout");
+    }, {enableHighAccuracy:true, timeout:15000, maximumAge:30000});
+  }catch(e){ settled = true; clearTimeout(watchdog); locationFailed("timeout"); }
+}
+async function locationFailed(kind){
+  locating = false;
+  state.locFailed = true; save();
+  {
+    const msg = kind==="denied"
+      ? "Location is blocked for this website. On iPhone: Settings → Privacy & Security → Location Services → turn it on, then Safari Websites → “While Using the App” (and Precise Location on). Then tap “Share Live Location” again — or continue without location."
+      : kind==="unsupported"
+      ? "This browser can't share your location. You can continue without it: tap “I'm here” when you arrive."
+      : "Couldn't get your position. Check that Location Services are on, then try again — or continue without location.";
+    pushPaddy({t:"sys", text:msg});
+  }
+  updateStageUI();
+}
+async function continueWithoutGps(){
+  state.noGps = true; state.locFailed = false;
+  pushPaddy({t:"sys", text:"Location off. When you get to the meeting place, tap “I'm here” at the bottom of the chat."});
+  state.stage = "travelling"; save();
+  updateStageUI();
+  await paddySays(PADDY.locationOk);
 }
 
 function startWatch(){
+  if(state.noGps) return;
   if(watchId!==null || !("geolocation" in navigator)) return;
   watchId = navigator.geolocation.watchPosition(checkPosition, ()=>{
     $("gpstext").textContent = "Location unavailable — tap “I'm here”";
@@ -1162,19 +1207,33 @@ function checkPosition(pos){
 }
 
 $("imhere").onclick = ()=>{
+  // Without GPS (refused or broken): trust the players
+  if(state.noGps || !("geolocation" in navigator)){ arrive(); return; }
   $("gpstext").textContent = "Checking your position…";
+  let settled = false;
+  const fail = ()=>{
+    if(settled) return; settled = true;
+    // Position impossible to get now: switch to "location off" so the next tap on I'm here is trusted
+    state.noGps = true; save(); stopWatch();
+    $("gpstext").textContent = "Location off — tap “I'm here” when you arrive";
+    pushPaddy({t:"sys", text:"Couldn't get your position. Location is now off: tap “I'm here” again once you're at the meeting place."});
+  };
+  const watchdog = setTimeout(fail, 20000);
   navigator.geolocation.getCurrentPosition(pos=>{
-    checkPosition(pos);
-    if(walking()){
-      const d = Math.round(distance({lat:pos.coords.latitude,lng:pos.coords.longitude}, currentTarget().pt));
-      $("gpstext").textContent = "Sharing location";
-      const far = d>400, st = state.stage;
-      paddySays([ st==="verify" ? (far ? PADDY.checkNotHereFar : PADDY.checkNotHereNear)
-                : st==="bookbox" ? (far ? PADDY.boxNotHereFar : PADDY.boxNotHereNear)
-                : (far ? PADDY.notHereFar : PADDY.notHereNear) ]);
-    }
-  }, ()=>{ $("gpstext").textContent = "Location unavailable — check your settings"; },
-  {enableHighAccuracy:true, timeout:15000, maximumAge:0});
+    if(settled) return; settled = true; clearTimeout(watchdog);
+    const here = {lat:pos.coords.latitude, lng:pos.coords.longitude};
+    const {pt, r} = currentTarget();
+    const d = distance(here, pt), acc = pos.coords.accuracy || 0;
+    $("gpstext").textContent = "Sharing location";
+    // Lenient when the players say they're there: GPS error margin counts in their favour,
+    // and an approximate fix (Precise Location off) is trusted
+    if(d <= Math.max(r, 60) || d <= r + acc || acc > 300){ arrive(); return; }
+    const far = d>400, st = state.stage;
+    paddySays([ st==="verify" ? (far ? PADDY.checkNotHereFar : PADDY.checkNotHereNear)
+              : st==="bookbox" ? (far ? PADDY.boxNotHereFar : PADDY.boxNotHereNear)
+              : (far ? PADDY.notHereFar : PADDY.notHereNear) ]);
+  }, ()=>{ clearTimeout(watchdog); fail(); },
+  {enableHighAccuracy:true, timeout:15000, maximumAge:10000});
 };
 
 let arriving = false;
