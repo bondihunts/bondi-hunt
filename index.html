@@ -140,6 +140,14 @@ button{font-family:inherit}
 .cp-dial span{position:absolute;left:50%;top:50%;font-weight:bold;font-size:22px;transform-origin:0 0}
 .cp-dial span.n{color:#ff3b30}
 .cp-dial i{position:absolute;left:50%;top:50%;font-style:normal;font-size:12px;color:#ccc;transform-origin:0 0}
+#calc .ca-body{flex:1;background:#1c1c1c;display:flex;flex-direction:column;padding:12px 12px var(--home-gap)}
+.ca-disp{flex:1;display:flex;align-items:flex-end;justify-content:flex-end;color:#fff;font-size:64px;font-weight:200;padding:0 10px 14px;
+  overflow:hidden;white-space:nowrap;background:linear-gradient(#3b3b3b,#1c1c1c);border-radius:10px;margin-bottom:12px;min-height:110px}
+.ca-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.ca-keys button{height:62px;border-radius:12px;border:1px solid #000;font-size:28px;color:#fff;cursor:pointer;
+  background:linear-gradient(#5a5a5a,#2e2e2e);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.ca-keys button.op{background:linear-gradient(#ffb74d,#e65100)} .ca-keys button.fn{background:linear-gradient(#9a9a9a,#5c5c5c);font-size:22px}
+.ca-keys button.zero{grid-column:span 2} .ca-keys button:active{filter:brightness(1.3)} .ca-keys button.on{box-shadow:inset 0 0 0 3px #fff}
 .cp-read{font-size:46px;font-weight:200;margin-top:22px;letter-spacing:1px}
 .cp-msg{font-size:14px;color:#bbb;text-align:center;min-height:20px;margin-top:6px;max-width:280px}
 .st-list{background:repeating-linear-gradient(90deg,#c5ccd4 0 5px,#cbd2d8 5px 8px);padding:10px 10px var(--home-gap)}
@@ -319,6 +327,15 @@ button{font-family:inherit}
       <div class="cp-read" id="cpRead">— °</div>
       <div class="cp-msg" id="cpMsg"></div>
       <button class="action" id="cpStart">Start compass</button>
+    </div>
+  </section>
+
+  <!-- CALCULATOR -->
+  <section id="calc" class="screen">
+    <div class="navbar"><button class="link back-btn">Home</button><h1>Calculator</h1></div>
+    <div class="ca-body">
+      <div class="ca-disp" id="caDisp">0</div>
+      <div class="ca-keys" id="caKeys"></div>
     </div>
   </section>
 
@@ -760,7 +777,7 @@ const APPS = [
   {name:"Maps",       icon:"🗺️", bg:"linear-gradient(#d8f0b8,#7cb342)"},
   {name:"Weather",    icon:"⛅", bg:"linear-gradient(#7fbaf5,#1f5fbf)"},
   {name:"Compass",    icon:"🧭", bg:"linear-gradient(#555,#111)", open:()=>go("compass")},
-  {name:"Calculator", icon:"🔢", bg:"linear-gradient(#ffb74d,#e65100)"},
+  {name:"Calculator", icon:"🔢", bg:"linear-gradient(#ffb74d,#e65100)", open:()=>go("calc")},
   {name:"Notes",      icon:"📝", bg:"linear-gradient(#fff6c2,#f2c94c)", open:()=>go("notes")},
   {name:"Settings",   icon:"⚙️", bg:"linear-gradient(#c8c8c8,#7d7d7d)", open:()=>go("settings")}
 ];
@@ -871,7 +888,7 @@ $("chatAvatar").onclick = $("chatWho").onclick = ()=>{ if(chatWith) go("card", c
    screen. The browser / Android back button is wired to the same stack. */
 let stack = [];
 let histOK = true, ignorePop = 0;
-const BACK_LABEL = {photos:"Camera Roll", viewer:"Photo", notes:"Notes", note:"Note", compass:"Compass", settings:"Settings", home:"Home", contacts:"All Contacts", messages:"Messages", card:"Info", chat:"Back"};
+const BACK_LABEL = {photos:"Camera Roll", viewer:"Photo", notes:"Notes", note:"Note", compass:"Compass", calc:"Calculator", settings:"Settings", home:"Home", contacts:"All Contacts", messages:"Messages", card:"Info", chat:"Back"};
 function render(e, fresh){
   if(e.name==="home") goHome();
   else if(e.name==="contacts") openContacts(fresh);
@@ -883,6 +900,7 @@ function render(e, fresh){
   else if(e.name==="notes") openNotes();
   else if(e.name==="note") openNote(e.arg);
   else if(e.name==="compass") openCompass();
+  else if(e.name==="calc") show("calc");
   else if(e.name==="chat") openChat(e.arg);
   const prev = stack[stack.length-2];
   document.querySelectorAll(".back-btn").forEach(b=>{ b.textContent = (prev ? BACK_LABEL[prev.name] : "Home"); });
@@ -1175,13 +1193,32 @@ async function locationFailed(kind){
   state.locFailed = true; save();
   {
     const msg = kind==="denied"
-      ? "Location is blocked for this website. On iPhone: Settings → Privacy & Security → Location Services → turn it on, then Safari Websites → “While Using the App” (and Precise Location on). Then tap “Share Live Location” again — or continue without location."
+      ? "Location is blocked for this website. " + locationHelp() + " Then tap “Share Live Location” again — or continue without location."
       : kind==="unsupported"
       ? "This browser can't share your location. You can continue without it: tap “I'm here” when you arrive."
-      : "Couldn't get your position. Check that Location Services are on, then try again — or continue without location.";
+      : "Couldn't get your position. " + locationHelp() + " Then try again — or continue without location.";
     pushPaddy({t:"sys", text:msg});
   }
   updateStageUI();
+}
+// How to unblock location, depending on the phone and the browser
+function locationHelp(){
+  const ua = navigator.userAgent || "";
+  const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  if(ios){
+    const app = /CriOS/.test(ua) ? "Chrome" : /FxiOS/.test(ua) ? "Firefox" : /EdgiOS/.test(ua) ? "Edge" : null;
+    return app
+      ? `On iPhone: Settings → Privacy & Security → Location Services → turn it on, then ${app} → “While Using the App” (and Precise Location on).`
+      : "On iPhone: Settings → Privacy & Security → Location Services → turn it on, then Safari Websites → “While Using the App” (and Precise Location on).";
+  }
+  if(/Android/.test(ua)){
+    if(/SamsungBrowser/.test(ua))
+      return "On Android: swipe down from the top of the screen and turn Location on. Then in Samsung Internet: tap the menu (☰) → Settings → Sites and downloads → Site permissions → Location, and allow this site.";
+    if(/Firefox/.test(ua))
+      return "On Android: swipe down from the top of the screen and turn Location on. Then in Firefox: tap the lock icon left of the web address → Location → Allow.";
+    return "On Android: swipe down from the top of the screen and turn Location on. Then in Chrome: tap the icon left of the web address (lock or sliders) → Permissions → Location → Allow. Reload the page if needed.";
+  }
+  return "Turn on Location in your phone's settings, then allow location for this website in your browser.";
 }
 async function continueWithoutGps(){
   state.noGps = true; state.locFailed = false;
@@ -1397,6 +1434,34 @@ async function startCompass(){
 }
 $("cpStart").onclick = startCompass;
 function openCompass(){ show("compass"); if(cpOn) $("cpStart").style.display = "none"; }
+
+/* ================== CALCULATOR ================== */
+(function(){
+  const keys = [["C","fn"],["±","fn"],["%","fn"],["÷","op"],["7"],["8"],["9"],["×","op"],["4"],["5"],["6"],["−","op"],
+                ["1"],["2"],["3"],["+","op"],["0","zero"],["."],["=","op"]];
+  let cur = "0", acc = null, op = null, fresh = true;
+  const fmt = n => { if(!isFinite(n)) return "Error"; let t = String(+parseFloat(n.toPrecision(10))); return t.length > 10 ? n.toExponential(4) : t; };
+  const calc = (a, b, o) => o==="+" ? a+b : o==="−" ? a-b : o==="×" ? a*b : o==="÷" ? (b===0 ? NaN : a/b) : b;
+  const disp = () => { $("caDisp").textContent = cur; $("caDisp").style.fontSize = cur.length > 7 ? "44px" : "64px"; };
+  const mark = () => document.querySelectorAll("#caKeys .op").forEach(b => b.classList.toggle("on", b.textContent===op && fresh && acc!==null));
+  function press(k){
+    if(/^[0-9]$/.test(k)){ if(fresh || cur==="0"){ cur = k; fresh = false; } else if(cur.replace(/[-.]/g,"").length < 9) cur += k; }
+    else if(k==="."){ if(fresh){ cur = "0."; fresh = false; } else if(!cur.includes(".")) cur += "."; }
+    else if(k==="C"){ cur = "0"; acc = null; op = null; fresh = true; }
+    else if(k==="±"){ if(cur!=="0" && cur!=="Error") cur = cur.startsWith("-") ? cur.slice(1) : "-" + cur; }
+    else if(k==="%"){ cur = fmt(parseFloat(cur) / 100); fresh = true; }
+    else if(k==="="){ if(op!==null && acc!==null){ cur = fmt(calc(acc, parseFloat(cur), op)); acc = null; op = null; } fresh = true; }
+    else { // + − × ÷
+      if(op!==null && acc!==null && !fresh) cur = fmt(calc(acc, parseFloat(cur), op));
+      acc = parseFloat(cur); op = k; fresh = true;
+    }
+    if(cur==="Error"){ acc = null; op = null; fresh = true; }
+    disp(); mark();
+  }
+  const box = $("caKeys");
+  keys.forEach(([k, cls]) => { const b = document.createElement("button"); b.textContent = k; if(cls) b.className = cls; b.onclick = () => press(k); box.appendChild(b); });
+  window.calcPress = press;
+})();
 
 function openSettings(){
   const row = (ico, bg, label, val, sw) => `<div class="st-row"><span class="st-ico" style="background:${bg}">${ico}</span>${label}${
